@@ -71,8 +71,8 @@ Cost budget 前兩個免費。
 
 ### 1-6. 本機裝 AWS CLI（選用，07 會用到）
 
-```powershell
-winget install Amazon.AWSCLI
+```bash
+brew install awscli
 aws --version
 ```
 

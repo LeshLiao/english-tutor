@@ -9,9 +9,9 @@
 - [01](01-account-region-budget.md) 完成。
 - 本機已有 SSH 金鑰；沒有就先產生：
 
-```powershell
+```bash
 ssh-keygen -t ed25519 -C "english-tutor"
-Get-Content $env:UserProfile\.ssh\id_ed25519.pub   # 等一下要貼到 Lightsail
+cat ~/.ssh/id_ed25519.pub | pbcopy      # 直接複製到剪貼簿，等一下貼到 Lightsail
 ```
 
 ## 步驟
@@ -36,13 +36,13 @@ Lightsail → Instances → Create instance：
 | SSH key pair | `english-tutor`（2-1 上傳的） | |
 | Network type | Dual-stack（IPv4 + IPv6） | 含公開 IPv4，不另外收費 |
 | Plan | **$12 USD**（2 GB RAM、2 vCPU、60 GB SSD、3 TB 流量） | $7（1 GB）跑五個容器加 build 會很吃緊 |
-| Name | `english-tutor` | |
+| Name | `Ubuntu-english-tutor` | |
 
 建立後等狀態變成 Running（約 1–2 分鐘）。
 
 ### 2-3. 靜態 IP
 
-Networking → Create static IP → 選 Oregon → 附加到 `english-tutor`，名稱 `english-tutor-ip`。
+Networking → Create static IP → 選 Oregon → 附加到 `Ubuntu-english-tutor`，名稱 `english-tutor-ip`。
 
 - 附加在實例上的靜態 IP **免費**；沒附加的會收 $0.005/小時（約 $3.65/月），實例刪掉時記得一起刪 IP。
 - 記下這個 IP，之後 DNS 會指到這裡。
@@ -61,8 +61,17 @@ IPv6 Firewall 同樣加 443。其他全部不開。
 
 ### 2-5. 首次登入
 
-```powershell
+```bash
 ssh ubuntu@<STATIC_IP>
+```
+
+方便起見可在 `~/.ssh/config` 加一段，之後 `ssh english` 就能登入：
+
+```
+Host english
+    HostName <STATIC_IP>
+    User ubuntu
+    IdentityFile ~/.ssh/id_ed25519
 ```
 
 > Lightsail Ubuntu 的預設使用者是 `ubuntu`，不是 `root`；需要 root 時用 `sudo`。
@@ -93,7 +102,8 @@ docker compose version
 docker run --rm hello-world
 ```
 
-Lightsail 實例是 x86_64，映像檔與本機 Docker Desktop build 出來的相同，不需要處理 ARM。
+Lightsail 實例是 x86_64。本文件的映像都在這台機器上 build，所以不用管架構；
+若之後想在 Apple Silicon 的 Mac 上 build 再推上去，要加 `--platform linux/amd64`，否則會 build 出 ARM 映像跑不起來。
 
 ### 2-7. 關閉密碼登入（Lightsail 預設已關，確認即可）
 

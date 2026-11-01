@@ -72,7 +72,7 @@ Lightsail 警報 ──▶ Email
 - [steps/09-mcp-http-mode.md](../steps/09-mcp-http-mode.md) 完成，本機容器版（`--profile http --profile prod`）穩定跑過至少一週。
 - 既有的 AWS 帳號，root 可登入。
 - 一個網域（可在 Route 53 買，或用既有註冊商）。
-- 本機有 SSH 用戶端（Windows 11 內建 `ssh`、`ssh-keygen`）。
+- 本機為 macOS，終端機內建 `ssh`、`ssh-keygen`、`curl`、`dig`；AWS 操作全部用瀏覽器 Console。
 
 ## 完成條件（全部）
 

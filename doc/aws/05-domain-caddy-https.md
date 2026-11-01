@@ -39,8 +39,8 @@ Route 53 → Registered domains → Register，`.com` 約 $14–15/年，會自�
 
 等生效：
 
-```powershell
-nslookup english.example.com
+```bash
+dig +short english.example.com     # 應印出 <STATIC_IP>
 ```
 
 > 若用 Cloudflare，不要開橘雲（proxy），否則 Let's Encrypt 的 HTTP 驗證會被擋；要用的話改 DNS-only。
@@ -72,12 +72,12 @@ Let's Encrypt 需要從外部連到 80 與 443，02-4 的 Lightsail 防火牆兩
 
 ### 5-4. 驗證
 
-```powershell
-curl.exe -I https://english.example.com/            # 401（需 basic auth）
-curl.exe -I http://english.example.com/             # 308 → https
-curl.exe -u user:pass https://english.example.com/api/docs
-curl.exe -I https://english.example.com/mcp         # 401（沒帶 X-API-Key）
-curl.exe -I -H "X-API-Key: <API_KEY>" https://english.example.com/mcp   # 不是 401
+```bash
+curl -I https://english.example.com/            # 401（需 basic auth）
+curl -I http://english.example.com/             # 308 → https
+curl -u user:pass https://english.example.com/api/docs
+curl -I https://english.example.com/mcp         # 401（沒帶 X-API-Key）
+curl -I -H "X-API-Key: <API_KEY>" https://english.example.com/mcp   # 不是 401
 ```
 
 瀏覽器開 `https://english.example.com`，輸入 basic auth 帳密後，三個頁面的資料應與 API 一致。

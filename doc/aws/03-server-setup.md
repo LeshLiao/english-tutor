@@ -56,7 +56,7 @@ cd english-tutor
 ```
 
 - 私有 repo：在機器上 `ssh-keygen -t ed25519`，把公鑰加到 GitHub repo 的 Deploy keys（唯讀），再用 `git@github.com:...` clone。
-- 確認 `.gitattributes` 有 `* text=auto eol=lf`，否則 Windows 上 commit 的 shell script 在容器裡會因 CRLF 出錯。
+- 建議仍放 `.gitattributes` 設 `* text=auto eol=lf`，之後若有人在 Windows 上 commit shell script 才不會因 CRLF 在容器裡出錯。
 
 ### 3-5. 正式版 `.env`
 

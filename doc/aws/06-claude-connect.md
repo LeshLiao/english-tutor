@@ -14,7 +14,7 @@
 
 ### 6-1. 切換 MCP 連線
 
-```powershell
+```bash
 claude mcp remove english-practice
 claude mcp add --transport http english-practice https://english.example.com/mcp --header "X-API-Key: <API_KEY>"
 claude mcp list
@@ -49,7 +49,7 @@ Oregon 到台灣約 130–160 ms，Hook 在背景執行所以感覺不到；
 本機 `docker compose up` 的開發環境照舊，只是 Claude Code 預設連雲端。
 要切回本機測試新工具時：
 
-```powershell
+```bash
 claude mcp remove english-practice
 claude mcp add --transport http english-practice http://localhost:8001/mcp --header "X-API-Key: dev-local-key"
 ```

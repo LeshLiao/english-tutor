@@ -35,7 +35,7 @@ sudo /srv/english-tutor/deploy/update.sh
 
 ### 8-2. 從本機一鍵觸發
 
-```powershell
+```bash
 ssh ubuntu@<STATIC_IP> sudo /srv/english-tutor/deploy/update.sh
 ```
 
