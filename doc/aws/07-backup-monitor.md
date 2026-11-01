@@ -17,7 +17,7 @@ S3 → Create bucket：
 | 欄位 | 值 |
 |------|----|
 | 名稱 | `english-tutor-backup-<隨機字串>`（全球唯一） |
-| 區域 | Tokyo（與實例同區，傳輸免費） |
+| 區域 | Oregon us-west-2（與實例同區，傳輸免費） |
 | Block all public access | 保持勾選 |
 | Versioning | 關閉（dump 檔本身就有時間戳） |
 
@@ -54,7 +54,7 @@ IAM → Users → Create user `english-backup`，不開 Console access，Attach 
 sudo -i
 snap install aws-cli --classic
 aws --version
-aws configure            # 填 access key、secret、region ap-northeast-1、output json
+aws configure            # 填 access key、secret、region us-west-2、output json
 aws s3 ls s3://english-tutor-backup-<隨機字串>/   # 空的，但不能是 AccessDenied
 ```
 

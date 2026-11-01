@@ -2,7 +2,7 @@
 
 ## 目標
 
-在東京建一台 Lightsail $12 實例（Ubuntu 24.04），掛靜態 IP，防火牆只開 22/80/443，用 SSH 金鑰登入並裝好 Docker。
+在 Oregon 建一台 Lightsail $12 實例（Ubuntu 24.04），掛靜態 IP，防火牆只開 22/80/443，用 SSH 金鑰登入並裝好 Docker。
 
 ## 前置條件
 
@@ -19,7 +19,7 @@ Get-Content $env:UserProfile\.ssh\id_ed25519.pub   # 等一下要貼到 Lightsai
 ### 2-1. 上傳 SSH 公鑰
 
 Lightsail Console（https://lightsail.aws.amazon.com）→ Account → SSH keys → Upload new：
-選區域 Tokyo，貼上 `id_ed25519.pub` 內容，名稱 `english-tutor`。
+選區域 Oregon，貼上 `id_ed25519.pub` 內容，名稱 `english-tutor`。
 
 > 也可以用 Lightsail 預設金鑰（會下載一個 `.pem`），但自己的金鑰比較好管理。
 
@@ -29,20 +29,20 @@ Lightsail → Instances → Create instance：
 
 | 項目 | 選擇 | 說明 |
 |------|------|------|
-| Region / Zone | **Tokyo (ap-northeast-1)**, Zone A | 01 決定的區域 |
+| Region / Zone | **Oregon (us-west-2)**, Zone A | 01 決定的區域 |
 | Platform | Linux/Unix | |
 | Blueprint | **OS Only → Ubuntu 24.04 LTS** | 不要選 Apps（例如 Docker 範本不存在，WordPress 等用不到） |
 | Launch script | 留空 | Docker 在 2-6 手動裝，比較好除錯 |
 | SSH key pair | `english-tutor`（2-1 上傳的） | |
 | Network type | Dual-stack（IPv4 + IPv6） | 含公開 IPv4，不另外收費 |
-| Plan | **$12 USD**（2 GB RAM、2 vCPU、60 GB SSD、3 TB 流量） | $7（1 GB）跑五個容器加 build 會很吃緊；$12 有新用戶前 3 個月免費 |
+| Plan | **$12 USD**（2 GB RAM、2 vCPU、60 GB SSD、3 TB 流量） | $7（1 GB）跑五個容器加 build 會很吃緊 |
 | Name | `english-tutor` | |
 
 建立後等狀態變成 Running（約 1–2 分鐘）。
 
 ### 2-3. 靜態 IP
 
-Networking → Create static IP → 選 Tokyo → 附加到 `english-tutor`，名稱 `english-tutor-ip`。
+Networking → Create static IP → 選 Oregon → 附加到 `english-tutor`，名稱 `english-tutor-ip`。
 
 - 附加在實例上的靜態 IP **免費**；沒附加的會收 $0.005/小時（約 $3.65/月），實例刪掉時記得一起刪 IP。
 - 記下這個 IP，之後 DNS 會指到這裡。
@@ -105,7 +105,7 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 ## 完成條件
 
-- [ ] Lightsail 顯示實例 Running，區域 Tokyo，方案 $12
+- [ ] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
 - [ ] 靜態 IP 已附加，`curl checkip` 結果一致
 - [ ] 防火牆只有 22/80/443
 - [ ] `ssh ubuntu@<STATIC_IP>` 以金鑰登入成功

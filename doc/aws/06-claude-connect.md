@@ -40,7 +40,8 @@ docker compose -f docker-compose.prod.yml exec db psql -U english -d english_pra
 
 ### 6-3. 延遲觀察
 
-東京到台灣約 35–50 ms，Hook 在背景執行所以感覺不到；
+Oregon 到台灣約 130–160 ms，Hook 在背景執行所以感覺不到；
+手動 `/english-check` 一次工具呼叫來回幾趟，比本機多約 0.5–1 秒，屬正常；
 `/english-check` 若明顯變慢，到 Lightsail 實例頁 Metrics 看 CPU 與 burst capacity，平時應在 5% 以下。
 
 ### 6-4. 本機版保留

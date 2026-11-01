@@ -76,7 +76,7 @@ jobs:
 
 1. ECR 建三個 private repository：`english-backend`、`english-mcp`、`english-frontend`（每 GB $0.10/月，三個映像約 $0.1–0.3）。
 2. GitHub Actions 用 OIDC（不需放 AWS key 在 GitHub）assume 一個只能 push ECR 的 IAM role，build 後 push。
-3. `docker-compose.prod.yml` 的 `build:` 改成 `image: <account>.dkr.ecr.ap-northeast-1.amazonaws.com/english-backend:latest`。
+3. `docker-compose.prod.yml` 的 `build:` 改成 `image: <account>.dkr.ecr.us-west-2.amazonaws.com/english-backend:latest`。
 4. 機器上 07-2 的 IAM user 加 `ecr:GetAuthorizationToken` 與 `ecr:BatchGetImage` 等讀取權限，`update.sh` 改成 `aws ecr get-login-password | docker login` 再 `pull` + `up -d`。
 
 這也是之後升級到方案 C（Fargate）的前置工作，映像已在 ECR，直接沿用。

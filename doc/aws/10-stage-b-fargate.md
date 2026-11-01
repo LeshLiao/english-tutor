@@ -6,7 +6,7 @@
 - 需要零停機部署（單機 `up -d --build` 會斷線幾十秒）。
 - 想把 AWS 正規架構（VPC、ECS、RDS、ALB、IAM role）練一遍。
 
-每月約 $80，明細見 [09-cost.md](09-cost.md) 第四節。
+每月約 $66，明細見 [09-cost.md](09-cost.md) 第四節。
 
 ## 架構
 
@@ -46,7 +46,7 @@ Caddy 在這個架構裡消失：HTTPS 由 ALB + ACM 處理；basic auth 與 API
 4. **Secrets Manager**：建 `english/api-key`；DB 密碼由 RDS 建立時自動建。
 5. **ECS**：建 cluster（Fargate）、兩個 task definition（`secrets:` 引用密鑰，`awslogs`）、兩個 service。
 6. **ALB + ACM**：ACM 申請網域憑證（DNS 驗證，Route 53 一鍵）；ALB listener 443，target group 各指向兩個 service；health check `/health`。
-7. **S3 + CloudFront**：bucket 放 build 產物；CloudFront distribution 以 OAC 讀 S3，alternate domain + ACM（**CloudFront 的憑證要申請在 us-east-1**）。
+7. **S3 + CloudFront**：bucket 放 build 產物；CloudFront distribution 以 OAC 讀 S3，alternate domain + ACM（**CloudFront 的憑證要申請在 us-east-1，不是 us-west-2**）。
 8. **Route 53**：`english.example.com` → CloudFront alias；`api.english.example.com` → ALB alias（或同網域用 CloudFront behavior 轉 `/api`、`/mcp` 到 ALB）。
 9. **Claude Code**：`claude mcp add` 改指向新網址，回歸測試同 [06](06-claude-connect.md)。
 10. **切換**：DNS TTL 先降到 60 秒，確認新環境資料一致後切換；Lightsail 保留一週再刪（記得刪靜態 IP）。
