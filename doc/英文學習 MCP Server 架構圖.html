@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>英文練習系統架構圖</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+  /* Layout: one wide figure (Claude Code 本機 ← → Docker 容器) with a short legend and a local/AWS mapping table under it. */
+  :root {
+    --bg: #f5f6f3;
+    --fg: #1c221f;
+    --muted: #5d665f;
+    --line: #c7cdc6;
+    --card: #ffffff;
+    --claude-zone: #fbf1e6;
+    --claude-edge: #b8641f;
+    --docker-zone: #e9f0f5;
+    --docker-edge: #2f6d8f;
+    --accent: #2f6d8f;
+    --phase2: #8a7f6f;
+    --font-display: "IBM Plex Sans", "Noto Sans TC", "Segoe UI", sans-serif;
+    --font-body: "Noto Sans TC", "IBM Plex Sans", "Segoe UI", sans-serif;
+    --font-mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #161a18; --fg: #e6e9e4; --muted: #a2aaa3; --line: #3b423e; --card: #202623;
+      --claude-zone: #2a2119; --claude-edge: #e0924f;
+      --docker-zone: #192329; --docker-edge: #6fb0d2;
+      --accent: #6fb0d2; --phase2: #a89d8b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #161a18; --fg: #e6e9e4; --muted: #a2aaa3; --line: #3b423e; --card: #202623;
+    --claude-zone: #2a2119; --claude-edge: #e0924f;
+    --docker-zone: #192329; --docker-edge: #6fb0d2;
+    --accent: #6fb0d2; --phase2: #a89d8b;
+    color-scheme: dark;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.6;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 32px 48px;
+  }
+  main { max-width: 1160px; margin: 0 auto; display: grid; gap: 28px; }
+  header { display: grid; gap: 6px; }
+  .eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--font-display); font-size: 28px; font-weight: 600; margin: 0; text-wrap: balance; }
+  header p { margin: 0; color: var(--muted); max-width: 64ch; }
+
+  figure { margin: 0; display: grid; gap: 12px; }
+  .scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 6px; background: var(--card); }
+  svg { display: block; width: 100%; min-width: 760px; height: auto; font-family: var(--font-body); }
+  figcaption { color: var(--muted); font-size: 14px; max-width: 70ch; }
+
+  /* SVG styling through page tokens */
+  .zone-claude { fill: var(--claude-zone); stroke: var(--claude-edge); stroke-width: 1.5; }
+  .zone-docker { fill: var(--docker-zone); stroke: var(--docker-edge); stroke-width: 1.5; }
+  .zone-title { font-family: var(--font-display); font-size: 14px; font-weight: 600; }
+  .zone-title.claude { fill: var(--claude-edge); }
+  .zone-title.docker { fill: var(--docker-edge); }
+  .box { fill: var(--card); stroke: var(--fg); stroke-width: 1.2; }
+  .box.p2 { stroke: var(--phase2); stroke-dasharray: 5 4; }
+  .box.opt { stroke: var(--muted); }
+  .t { fill: var(--fg); font-size: 13px; font-weight: 500; }
+  .t.p2 { fill: var(--phase2); }
+  .s { fill: var(--muted); font-size: 11px; }
+  .m { font-family: var(--font-mono); }
+  .edge { fill: none; stroke: var(--fg); stroke-width: 1.4; }
+  .edge.data { stroke: var(--accent); stroke-width: 1.8; }
+  .edge.p2 { stroke: var(--phase2); stroke-dasharray: 5 4; }
+  .lbl { fill: var(--fg); font-size: 11px; }
+  .lbl.data { fill: var(--accent); font-weight: 500; }
+  .lbl.p2 { fill: var(--phase2); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 13px; color: var(--muted); }
+  .legend span { display: inline-flex; align-items: center; gap: 8px; }
+  .legend i { display: inline-block; width: 28px; height: 0; border-top: 2px solid var(--fg); }
+  .legend i.data { border-color: var(--accent); }
+  .legend i.p2 { border-top-style: dashed; border-color: var(--phase2); }
+
+  section { display: grid; gap: 12px; }
+  h2 { font-family: var(--font-display); font-size: 18px; font-weight: 600; margin: 0; }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .04em; }
+  td:first-child { font-weight: 500; white-space: nowrap; }
+  code { font-family: var(--font-mono); font-size: 13px; }
+  ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <div class="eyebrow">English Practice · MCP Server</div>
+    <h1>英文練習系統架構圖</h1>
+    <p>依《英文學習 MCP Server 規劃》與《本機架設規劃》整理。左半是 Claude Code 這一側，負責判斷句子對錯；右半是 Docker 容器，只負責儲存與查詢。</p>
+  </header>
+
+  <figure>
+    <div class="scroll">
+      <svg viewBox="0 0 1120 640" role="img" aria-label="使用者在 Claude Code 輸入 prompt，經由 Skill 或 Hook 觸發 Claude 分析，結果透過 MCP Server 以 HTTP 送到 Docker 內的 FastAPI，再寫入 PostgreSQL；React 前端與 Adminer 分別透過 FastAPI 與直接連線讀取資料。">
+        <defs>
+          <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+            <path d="M0 0 L10 5 L0 10 z" fill="currentColor"></path>
+          </marker>
+        </defs>
+
+        <!-- Claude Code zone -->
+        <rect class="zone-claude" x="20" y="20" width="420" height="470" rx="8"></rect>
+        <text class="zone-title claude" x="40" y="46">Claude Code（Windows 本機）</text>
+        <text class="s" x="40" y="62">句子的分析、糾正、錯誤分類都在這裡由 Claude 完成</text>
+
+        <!-- Prompt -->
+        <rect class="box" x="50" y="80" width="360" height="52" rx="4"></rect>
+        <text class="t" x="230" y="101" text-anchor="middle">使用者輸入 prompt</text>
+        <text class="s" x="230" y="119" text-anchor="middle">英文句子混著中文、程式碼一起送出</text>
+
+        <!-- Skill -->
+        <rect class="box" x="50" y="180" width="160" height="100" rx="4"></rect>
+        <text class="t" x="130" y="203" text-anchor="middle">Skill</text>
+        <text class="s m" x="130" y="221" text-anchor="middle">english-check</text>
+        <text class="s" x="130" y="243" text-anchor="middle">手動請 Claude 檢查</text>
+        <text class="s" x="130" y="259" text-anchor="middle">先查分類，再存結果</text>
+
+        <!-- Hook -->
+        <rect class="box" x="250" y="180" width="160" height="70" rx="4"></rect>
+        <text class="t" x="330" y="203" text-anchor="middle">Hook</text>
+        <text class="s m" x="330" y="221" text-anchor="middle">UserPromptSubmit</text>
+        <text class="s" x="330" y="239" text-anchor="middle">check_english.py 過濾英文</text>
+
+        <!-- claude -p -->
+        <rect class="box" x="250" y="300" width="160" height="56" rx="4"></rect>
+        <text class="t m" x="330" y="323" text-anchor="middle">claude -p</text>
+        <text class="s" x="330" y="341" text-anchor="middle">背景 agent，不拖慢主對話</text>
+
+        <!-- MCP Server stdio -->
+        <rect class="box" x="50" y="400" width="360" height="70" rx="4"></rect>
+        <text class="t" x="230" y="422" text-anchor="middle">MCP Server（FastMCP，stdio 子程序）</text>
+        <text class="s m" x="230" y="441" text-anchor="middle">list_error_types · save_sentence · get_error_stats</text>
+        <text class="s m" x="230" y="457" text-anchor="middle">search_sentences · get_recent_mistakes</text>
+
+        <!-- Edges inside Claude zone -->
+        <line class="edge" x1="130" y1="132" x2="130" y2="180" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="138" y="160">手動呼叫</text>
+        <line class="edge" x1="330" y1="132" x2="330" y2="180" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="338" y="160">每次送出自動觸發</text>
+        <line class="edge" x1="330" y1="250" x2="330" y2="300" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="338" y="280">Popen 背景啟動</text>
+        <line class="edge" x1="130" y1="280" x2="130" y2="400" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="138" y="345">呼叫工具</text>
+        <line class="edge" x1="330" y1="356" x2="330" y2="400" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="338" y="382">有錯才存</text>
+
+        <!-- Docker zone -->
+        <rect class="zone-docker" x="480" y="20" width="620" height="470" rx="8"></rect>
+        <text class="zone-title docker" x="500" y="46">Docker Compose（WSL2 內的 Linux 容器）</text>
+        <text class="s" x="500" y="62">只做儲存與查詢，不做語言判斷</text>
+
+        <!-- React nginx (phase 2) -->
+        <rect class="box p2" x="840" y="90" width="230" height="60" rx="4"></rect>
+        <text class="t p2" x="955" y="113" text-anchor="middle">React（nginx 容器 :3000）</text>
+        <text class="s m" x="955" y="131" text-anchor="middle">第二階段 · profile prod</text>
+
+        <!-- MCP http (phase 2) -->
+        <rect class="box p2" x="520" y="250" width="230" height="60" rx="4"></rect>
+        <text class="t p2" x="635" y="273" text-anchor="middle">MCP Server 容器 :8001</text>
+        <text class="s m" x="635" y="291" text-anchor="middle">第二階段 · Streamable HTTP</text>
+
+        <!-- Adminer -->
+        <rect class="box opt" x="840" y="250" width="230" height="60" rx="4"></rect>
+        <text class="t" x="955" y="273" text-anchor="middle">Adminer :8080（選用）</text>
+        <text class="s" x="955" y="291" text-anchor="middle">瀏覽器看資料表，除錯用</text>
+
+        <!-- FastAPI -->
+        <rect class="box" x="520" y="400" width="230" height="70" rx="4"></rect>
+        <text class="t" x="635" y="422" text-anchor="middle">FastAPI backend :8000</text>
+        <text class="s" x="635" y="441" text-anchor="middle">唯一資料讀寫入口 · X-API-Key 驗證</text>
+        <text class="s" x="635" y="457" text-anchor="middle">Alembic 管 migration</text>
+
+        <!-- PostgreSQL -->
+        <rect class="box" x="840" y="400" width="230" height="70" rx="4"></rect>
+        <text class="t" x="955" y="422" text-anchor="middle">PostgreSQL 16 :5432</text>
+        <text class="s m" x="955" y="441" text-anchor="middle">users · sentences · error_types</text>
+        <text class="s m" x="955" y="457" text-anchor="middle">sentence_errors · volume pgdata</text>
+
+        <!-- Edges in Docker zone -->
+        <line class="edge data" x1="750" y1="435" x2="840" y2="435" marker-end="url(#arrow)"></line>
+        <text class="lbl data" x="795" y="426" text-anchor="middle">SQLAlchemy</text>
+        <line class="edge" x1="955" y1="310" x2="955" y2="400" marker-end="url(#arrow)"></line>
+        <text class="lbl" x="963" y="358">直接連線</text>
+        <line class="edge p2" x1="635" y1="310" x2="635" y2="400" marker-end="url(#arrow)"></line>
+        <text class="lbl p2" x="643" y="358">改走 HTTP 後取代 stdio</text>
+        <polyline class="edge p2" points="840,120 800,120 800,415 750,415" marker-end="url(#arrow)"></polyline>
+        <text class="lbl p2" x="792" y="200" text-anchor="end">REST</text>
+
+        <!-- MCP stdio -> FastAPI (crosses the boundary) -->
+        <line class="edge data" x1="410" y1="435" x2="520" y2="435" marker-end="url(#arrow)"></line>
+        <text class="lbl data" x="465" y="426" text-anchor="middle">HTTP</text>
+        <text class="lbl data m" x="465" y="452" text-anchor="middle">X-API-Key</text>
+
+        <!-- Browser / React dev (phase 1) -->
+        <rect class="box" x="520" y="560" width="230" height="60" rx="4"></rect>
+        <text class="t" x="635" y="583" text-anchor="middle">瀏覽器 · React（Vite dev :5173）</text>
+        <text class="s" x="635" y="601" text-anchor="middle">總覽、句子列表、句子詳情</text>
+        <line class="edge data" x1="635" y1="560" x2="635" y2="470" marker-end="url(#arrow)"></line>
+        <text class="lbl data m" x="643" y="520">GET /sentences · /stats/errors</text>
+
+        <!-- Developer -->
+        <rect class="box" x="50" y="560" width="360" height="60" rx="4"></rect>
+        <text class="t" x="230" y="583" text-anchor="middle">你（開發者）</text>
+        <text class="s" x="230" y="601" text-anchor="middle">在 Claude Code 寫英文，在瀏覽器看統計與複習</text>
+        <line class="edge" x1="230" y1="560" x2="230" y2="490" marker-end="url(#arrow)"></line>
+        <line class="edge" x1="410" y1="590" x2="520" y2="590" marker-end="url(#arrow)"></line>
+      </svg>
+    </div>
+    <figcaption>第一階段（實線）：MCP Server 由 Claude Code 以 stdio 直接啟動，透過 HTTP 呼叫容器裡的 FastAPI 寫入 PostgreSQL；React 用 Vite dev server 讀同一個 API。第二階段（虛線）：MCP Server 與 React 也進容器，為搬上 AWS 做準備，程式碼不變，只換傳輸方式與啟動設定。</figcaption>
+    <div class="legend">
+      <span><i></i>控制流程（觸發、啟動）</span>
+      <span><i class="data"></i>資料流程（寫入、查詢）</span>
+      <span><i class="p2"></i>第二階段才啟用</span>
+    </div>
+  </figure>
+
+  <section>
+    <h2>兩條觸發路徑</h2>
+    <ul>
+      <li><strong>Skill（手動）</strong>：你主動請 Claude 檢查一句英文。Claude 先呼叫 <code>list_error_types</code> 沿用現有分類，再呼叫 <code>save_sentence</code> 儲存，最後回覆修正句與說明。</li>
+      <li><strong>Hook（自動）</strong>：每次送出 prompt 時，<code>check_english.py</code> 過濾掉程式碼與中文，只有真正的英文句子才在背景以 <code>claude -p</code> 另開一個 agent 分析，有錯誤才透過 MCP 儲存，主對話完全不受影響。</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>本機與 AWS 的對應</h2>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>元件</th><th>本機（本圖）</th><th>AWS</th></tr></thead>
+        <tbody>
+          <tr><td>MCP Server</td><td>stdio 子程序，第二階段改容器 HTTP</td><td>ECS Fargate，Streamable HTTP + 認證</td></tr>
+          <tr><td>FastAPI</td><td>Docker 容器 :8000</td><td>ECR + ECS Fargate，ALB 轉發</td></tr>
+          <tr><td>PostgreSQL</td><td>Docker 容器 + volume</td><td>RDS for PostgreSQL，私有子網</td></tr>
+          <tr><td>React</td><td>Vite dev server，第二階段 nginx 容器</td><td>S3 + CloudFront</td></tr>
+          <tr><td>密鑰</td><td><code>.env</code> 檔案</td><td>Secrets Manager</td></tr>
+          <tr><td>HTTPS</td><td>不需要</td><td>ALB + 憑證</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+</main>
+</body>
+</html>
