@@ -129,7 +129,7 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 - [x] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
 - [x] 靜態 IP 已附加，`curl checkip` 結果一致
-- [ ] 防火牆只有 22/80/443（待確認 HTTPS 443 已手動加）
+- [x] 防火牆只有 22/80/443
 - [x] `ssh english-tutor` 以金鑰登入成功
 - [x] `docker compose version` 正常
 
