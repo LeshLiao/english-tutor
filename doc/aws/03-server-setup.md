@@ -20,9 +20,12 @@ Lightsail 的防火牆在 Console 設（02 已做），機器內可不裝 ufw；
 ```bash
 apt update && apt upgrade -y
 apt install -y git fail2ban unattended-upgrades
-dpkg-reconfigure -plow unattended-upgrades    # 選 Yes
+dpkg-reconfigure -plow unattended-upgrades    # 選 Yes；不想跳選單可用 dpkg-reconfigure -f noninteractive unattended-upgrades
 timedatectl set-timezone Asia/Taipei
+[ -f /var/run/reboot-required ] && reboot    # 有更新 kernel 時會要求重開，約 30 秒
 ```
+
+> Ubuntu 24.04 的 `apt upgrade` 會跳 needrestart 的服務重啟選單；用 `ssh` 批次執行時先 `export DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a`。
 
 ### 3-2. 防火牆
 
@@ -83,10 +86,10 @@ chmod 600 .env
 
 ## 完成條件
 
-- [ ] `apt upgrade` 完成，`unattended-upgrades` 啟用
-- [ ] `free -h` 看到 2 GB swap
+- [x] `apt upgrade` 完成，`unattended-upgrades` 啟用
+- [x] `free -h` 看到 2 GB swap
 - [ ] `/srv/english-tutor/.env` 存在、權限 600、密碼與 API key 皆為新產生
-- [ ] 時區為 Asia/Taipei
+- [x] 時區為 Asia/Taipei
 
 ## 下一步
 
@@ -94,4 +97,10 @@ chmod 600 .env
 
 ## 實作紀錄
 
-（填寫日期、遇到的問題與解法）
+**2026-11-01**（前半段：3-1 到 3-3）
+
+- 從 Mac 以 `ssh english-tutor 'sudo bash -s' <<EOF` 批次執行，設 `DEBIAN_FRONTEND=noninteractive NEEDRESTART_MODE=a` 避免互動選單。
+- `apt upgrade` 後 `/var/run/reboot-required` 存在，`sudo reboot` 約 15 秒回來，kernel 7.0.0-1012-aws。
+- git 2.43.0、fail2ban active、`20auto-upgrades` 兩項皆為 1。
+- 2 GB `/swapfile` 已掛載並寫入 fstab，`vm.swappiness=10`；時區 Asia/Taipei。
+- 3-4 clone repo 與 3-5 `.env` 尚未做：repo 目前只有 `doc/`，等 backend / mcp-server / frontend 程式碼完成後再補。

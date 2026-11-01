@@ -58,7 +58,7 @@ Lightsail 警報 ──▶ Email
 |---|------|------|------|
 | 01 | [01-account-region-budget.md](01-account-region-budget.md) | 帳號安全檢查、IAM 使用者、確認區域（Oregon）、設 Budgets 警報 | ⬜ |
 | 02 | [02-lightsail-instance.md](02-lightsail-instance.md) | 在 Oregon 建立 Lightsail $12 實例、靜態 IP、防火牆、SSH 登入、裝 Docker | ✅ |
-| 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | ⬜ |
+| 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | 🔶 前半段完成，clone 與 `.env` 等程式碼就緒 |
 | 04 | [04-compose-prod.md](04-compose-prod.md) | `docker-compose.prod.yml` 在 Lightsail 上 build 並啟動 | ⬜ |
 | 05 | [05-domain-caddy-https.md](05-domain-caddy-https.md) | Route 53（或既有註冊商）DNS、Caddy 反向代理、HTTPS | ⬜ |
 | 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | ⬜ |
