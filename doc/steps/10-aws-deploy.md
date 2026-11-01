@@ -8,6 +8,7 @@
 
 - [09](09-mcp-http-mode.md) 完成，本機容器版穩定運作至少一週。
 
+> **詳細步驟：** AWS 版逐步文件見 [../aws/00-README.md](../aws/00-README.md)（2026-11-01 重新規劃，起步改用 Lightsail $12/月，含費用試算）。
 > **替代方案：** 階段 A 也可以改用 Hostinger KVM VPS（更便宜、內建 Docker），步驟見 [../hostinger/00-README.md](../hostinger/00-README.md)。
 
 ## 建議路線
