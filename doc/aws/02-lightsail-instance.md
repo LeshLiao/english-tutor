@@ -127,11 +127,11 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 ## 完成條件
 
-- [ ] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
-- [ ] 靜態 IP 已附加，`curl checkip` 結果一致
-- [ ] 防火牆只有 22/80/443
-- [ ] `ssh english-tutor` 以金鑰登入成功
-- [ ] `docker compose version` 正常
+- [x] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
+- [x] 靜態 IP 已附加，`curl checkip` 結果一致
+- [ ] 防火牆只有 22/80/443（待確認 HTTPS 443 已手動加）
+- [x] `ssh english-tutor` 以金鑰登入成功
+- [x] `docker compose version` 正常
 
 ## 下一步
 
@@ -139,4 +139,11 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 ## 實作紀錄
 
-（填寫日期、遇到的問題與解法）
+**2026-11-01**
+
+- 實例 `Ubuntu-english-tutor`，Oregon Zone A，Ubuntu 24.04.4 LTS，靜態 IP `44.228.11.180`。
+- 建立時 SSH key pair 誤選 Lightsail 預設金鑰，用自己上傳的 `id_ed25519` 登入被拒。
+  解法：下載 `LightsailDefaultKey-us-west-2.pem` 到 `~/.ssh/`，`chmod 400`，`~/.ssh/config` 加 `Host english-tutor` 並設 `IdentitiesOnly yes`
+  （本機 `Host *` 原本指定了另一把金鑰，不加 `IdentitiesOnly` 會一直送錯）。機器上的 `authorized_keys` 未動。
+- Docker 以官方 apt 來源安裝完成：Docker 29.9.2、Compose v5.6.1，`hello-world` 正常。密碼登入預設已關（`60-cloudimg-settings.conf`）。
+- 登入畫面提示 `New release '26.04.1 LTS' available`，**不要**跑 `do-release-upgrade`，維持 24.04。
