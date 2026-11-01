@@ -36,7 +36,7 @@ sudo /srv/english-tutor/deploy/update.sh
 ### 8-2. 從本機一鍵觸發
 
 ```bash
-ssh ubuntu@<STATIC_IP> sudo /srv/english-tutor/deploy/update.sh
+ssh english-tutor sudo /srv/english-tutor/deploy/update.sh
 ```
 
 ### 8-3. GitHub Actions 自動部署（選用）

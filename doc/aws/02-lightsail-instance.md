@@ -65,14 +65,26 @@ IPv6 Firewall 同樣加 443。其他全部不開。
 ssh ubuntu@<STATIC_IP>
 ```
 
-方便起見可在 `~/.ssh/config` 加一段，之後 `ssh english` 就能登入：
+**若建立實例時 SSH key pair 選的是 Lightsail 預設金鑰**（而不是 2-1 上傳的），要先把預設私鑰下載到本機：
+Account → SSH keys → Default keys → Oregon → Download，然後：
+
+```bash
+mv ~/Downloads/LightsailDefaultKey-us-west-2.pem ~/.ssh/
+chmod 400 ~/.ssh/LightsailDefaultKey-us-west-2.pem
+```
+
+在 `~/.ssh/config` **最前面**加一段（放在任何 `Host *` 之前），之後打 `ssh english-tutor` 就能登入：
 
 ```
-Host english
+Host english-tutor
     HostName <STATIC_IP>
     User ubuntu
-    IdentityFile ~/.ssh/id_ed25519
+    IdentityFile ~/.ssh/LightsailDefaultKey-us-west-2.pem   # 用自己的金鑰則改 ~/.ssh/id_ed25519
+    IdentitiesOnly yes
 ```
+
+> `IdentitiesOnly yes` 是為了避免 `Host *` 區塊指定的其他金鑰先被送出去而被拒絕。
+> 後續文件中的 `ssh ubuntu@<STATIC_IP>` 都可用 `ssh english-tutor` 取代，`scp` 同理。
 
 > Lightsail Ubuntu 的預設使用者是 `ubuntu`，不是 `root`；需要 root 時用 `sudo`。
 > 之後文件中的指令都以 `sudo -i` 切到 root 後執行，與 Hostinger 版一致。
@@ -118,7 +130,7 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 - [ ] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
 - [ ] 靜態 IP 已附加，`curl checkip` 結果一致
 - [ ] 防火牆只有 22/80/443
-- [ ] `ssh ubuntu@<STATIC_IP>` 以金鑰登入成功
+- [ ] `ssh english-tutor` 以金鑰登入成功
 - [ ] `docker compose version` 正常
 
 ## 下一步
