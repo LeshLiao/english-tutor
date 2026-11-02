@@ -68,3 +68,19 @@ claude mcp add --transport http english-practice http://localhost:8001/mcp --hea
 ## 實作紀錄
 
 （填寫日期、遇到的問題與解法）
+
+### 2026-11-02（暫時版：先用 IP 走 HTTP，05 做完再換 https）
+
+使用者決定不等網域，先讓 Claude Code 連雲端 MCP。
+
+```bash
+KEY=$(ssh english-tutor "grep '^API_KEY=' /srv/english-tutor/.env | cut -d= -f2")   # 不要 echo
+claude mcp remove english-practice
+claude mcp add --transport http english-practice http://44.228.11.180/mcp --header "X-API-Key: $KEY"
+claude mcp list        # english-practice: http://44.228.11.180/mcp (HTTP) - ✔ Connected
+```
+
+- 回歸：`claude -p "/english-tutor-plugin:english-check She have two cat."` → 雲端 id 50、`source = skill`；本機資料庫沒有新增，確認走的是 Lightsail。Hook 用同一個註冊，不用改。
+- 風險：05 之前 API key 以明文經 HTTP 走公網。資料只是英文句子，且 key 可隨時在伺服器 `.env` 換掉並 `up -d` 重啟。
+- 05 設好網域後，只要把上面的網址換成 `https://<domain>/mcp` 再跑一次 `claude mcp remove` / `add`。
+- 本機的 `docker compose --profile http` mcp 容器此時不再被 Claude Code 使用，可停掉；要回本機開發時把網址換回 `http://localhost:8001/mcp` 與 `dev-local-key`。

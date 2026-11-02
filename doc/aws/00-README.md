@@ -61,7 +61,7 @@ Lightsail 警報 ──▶ Email
 | 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | ✅ |
 | 04 | [04-compose-prod.md](04-compose-prod.md) | `docker-compose.prod.yml` 在 Lightsail 上 build 並啟動 | ✅ |
 | 05 | [05-domain-caddy-https.md](05-domain-caddy-https.md) | Route 53（或既有註冊商）DNS、Caddy 反向代理、HTTPS | ⬜ |
-| 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | ⬜ |
+| 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | 🔶 暫以 `http://44.228.11.180/mcp` 連線並通過回歸；05 後換 https |
 | 07 | [07-backup-monitor.md](07-backup-monitor.md) | pg_dump 到 S3、Lightsail 自動快照、警報 | ⬜ |
 | 08 | [08-update-cicd.md](08-update-cicd.md) | 更新流程；選用 GitHub Actions 自動部署 | ⬜ |
 | 09 | [09-cost.md](09-cost.md) | 費用明細、各方案試算、查價來源 | 參考 |
