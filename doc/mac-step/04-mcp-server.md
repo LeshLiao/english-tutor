@@ -126,3 +126,4 @@ claude mcp list    # 應顯示 english-practice ... ✔ Connected
 
 **重開 Claude Code 後（同日）**：`english-practice` 工具已載入，Claude 直接呼叫 `list_error_types` 回傳三個類型，`save_sentence` 存入 id 19（`He is interesting in music.` → `word choice`），資料庫確認無誤。步驟 04 全部完成。
 
+> 2026-11-02 起（[09](09-mcp-http-mode.md) 完成後）Claude Code 改以 HTTP 連 `http://localhost:8001/mcp`，本步驟的 stdio 註冊已移除；stdio 模式仍保留給本機除錯用。

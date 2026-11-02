@@ -35,6 +35,24 @@ services:
       timeout: 5s
       retries: 5
 
+  mcp:
+    build: ./mcp-server
+    environment:
+      BACKEND_URL: http://backend:8000
+      API_KEY: ${API_KEY}       # 同一把 key：打後端用它，client 連 MCP 也要帶它
+      MCP_TRANSPORT: http
+    ports:
+      - "8001:8001"
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles: ["http"]          # 第二階段才啟用：docker compose --profile http up
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8001/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   frontend:
     build: ./frontend
     environment:

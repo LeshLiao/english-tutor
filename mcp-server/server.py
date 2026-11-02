@@ -3,12 +3,15 @@
 所有工具都呼叫 FastAPI 後端，不直接碰資料庫。
 環境變數：
   BACKEND_URL    後端位址，預設 http://localhost:8000
-  API_KEY        後端的 X-API-Key；未設定時會讀專案根目錄 .env
-  MCP_TRANSPORT  stdio（預設）或 http（Streamable HTTP，步驟 09 才用）
+  API_KEY        後端的 X-API-Key；未設定時會讀專案根目錄 .env。
+                 http 模式下，client 連 MCP 也要帶同一把 key（X-API-Key 或 Authorization: Bearer）
+  MCP_TRANSPORT  stdio（預設）或 http（Streamable HTTP，跑在容器裡）
+  MCP_HOST / MCP_PORT  http 模式的監聽位址，預設 0.0.0.0:8001
 """
 
 from __future__ import annotations
 
+import hmac
 import os
 from pathlib import Path
 from typing import Literal
@@ -17,6 +20,9 @@ import httpx
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from pydantic import BaseModel, Field
+from starlette.requests import Request
+from starlette.responses import JSONResponse, PlainTextResponse, Response
+from starlette.types import ASGIApp, Receive, Scope, Send
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
@@ -39,6 +45,8 @@ _load_dotenv_fallback()
 BACKEND_URL = os.environ.get("BACKEND_URL", "http://localhost:8000").rstrip("/")
 API_KEY = os.environ.get("API_KEY", "")
 MCP_TRANSPORT = os.environ.get("MCP_TRANSPORT", "stdio")
+MCP_HOST = os.environ.get("MCP_HOST", "0.0.0.0")
+MCP_PORT = int(os.environ.get("MCP_PORT", "8001"))
 
 mcp = MCPServer(
     name="english-practice",
@@ -234,9 +242,62 @@ def dismiss_sentence(sentence_id: int, dismissed: bool = True) -> dict:
     return {"sentence_id": data["id"], "is_dismissed": data["is_dismissed"]}
 
 
+# ---------------------------------------------------------------------------
+# HTTP 模式（Streamable HTTP）：API key 認證 + 健康檢查
+# ---------------------------------------------------------------------------
+
+
+@mcp.custom_route("/health", methods=["GET"], include_in_schema=False)
+async def health(_: Request) -> Response:
+    """給 docker compose healthcheck 用，不需要認證。"""
+    return JSONResponse({"status": "ok", "transport": "http"})
+
+
+def _presented_key(scope: Scope) -> str | None:
+    headers = {k.decode().lower(): v.decode() for k, v in scope.get("headers", [])}
+    if "x-api-key" in headers:
+        return headers["x-api-key"].strip()
+    auth = headers.get("authorization", "")
+    if auth.lower().startswith("bearer "):
+        return auth[7:].strip()
+    return None
+
+
+class ApiKeyMiddleware:
+    """純 ASGI middleware：除了 /health 之外，每個請求都要帶正確的 API key，否則 401。"""
+
+    def __init__(self, app: ASGIApp, api_key: str, exempt_paths: tuple[str, ...] = ("/health",)) -> None:
+        self.app = app
+        self.api_key = api_key
+        self.exempt_paths = exempt_paths
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http" or scope["path"] in self.exempt_paths:
+            await self.app(scope, receive, send)
+            return
+        presented = _presented_key(scope)
+        if presented is None or not hmac.compare_digest(presented, self.api_key):
+            response = PlainTextResponse("Unauthorized: missing or invalid API key", status_code=401)
+            await response(scope, receive, send)
+            return
+        await self.app(scope, receive, send)
+
+
+def build_http_app():
+    if not API_KEY:
+        raise SystemExit("API_KEY is required in http mode (refusing to start an unauthenticated MCP server)")
+    # stateless + json_response：每個請求獨立、不在記憶體存 session，之後可水平擴展
+    app = mcp.streamable_http_app(
+        streamable_http_path="/mcp", stateless_http=True, json_response=True, host=MCP_HOST
+    )
+    app.add_middleware(ApiKeyMiddleware, api_key=API_KEY)
+    return app
+
+
 if __name__ == "__main__":
     if MCP_TRANSPORT == "http":
-        # 步驟 09 再補認證與 host/port 設定
-        mcp.run(transport="streamable-http")
+        import uvicorn
+
+        uvicorn.run(build_http_app(), host=MCP_HOST, port=MCP_PORT, log_level="info")
     else:
         mcp.run(transport="stdio")
