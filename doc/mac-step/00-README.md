@@ -18,7 +18,7 @@
 | 07 | [07-remaining-tools-and-api.md](07-remaining-tools-and-api.md) | 補齊其餘 MCP 工具與 API（stats、search、recent） | ✅ |
 | 08 | [08-react-frontend.md](08-react-frontend.md) | React 前端三個頁面：總覽、列表、詳情 | ✅ |
 | 09 | [09-mcp-http-mode.md](09-mcp-http-mode.md) | MCP Server 改 Streamable HTTP 跑在容器裡，為上雲做準備 | ✅ |
-| 10 | [../aws/00-README.md](../aws/00-README.md) | （未來）部署到 AWS（Lightsail 起步，逐步文件與費用試算） | ⬜ |
+| 10 | [../aws/00-README.md](../aws/00-README.md) | 部署到 AWS（Lightsail 起步，逐步文件與費用試算） | 🔶 aws 02–04 完成，http://44.228.11.180 已上線；待 05 網域/HTTPS |
 | 10b | [../hostinger/00-README.md](../hostinger/00-README.md) | （未來）部署到 Hostinger VPS，階段 A 的替代方案 | ⬜ |
 
 ## 里程碑

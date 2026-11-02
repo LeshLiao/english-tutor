@@ -58,14 +58,15 @@ Lightsail 警報 ──▶ Email
 |---|------|------|------|
 | 01 | [01-account-region-budget.md](01-account-region-budget.md) | 帳號安全檢查、IAM 使用者、確認區域（Oregon）、設 Budgets 警報 | ⬜ |
 | 02 | [02-lightsail-instance.md](02-lightsail-instance.md) | 在 Oregon 建立 Lightsail $12 實例、靜態 IP、防火牆、SSH 登入、裝 Docker | ✅ |
-| 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | 🔶 前半段完成，clone 與 `.env` 等程式碼就緒 |
-| 04 | [04-compose-prod.md](04-compose-prod.md) | `docker-compose.prod.yml` 在 Lightsail 上 build 並啟動 | ⬜ |
+| 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | ✅ |
+| 04 | [04-compose-prod.md](04-compose-prod.md) | `docker-compose.prod.yml` 在 Lightsail 上 build 並啟動 | ✅ |
 | 05 | [05-domain-caddy-https.md](05-domain-caddy-https.md) | Route 53（或既有註冊商）DNS、Caddy 反向代理、HTTPS | ⬜ |
 | 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | ⬜ |
 | 07 | [07-backup-monitor.md](07-backup-monitor.md) | pg_dump 到 S3、Lightsail 自動快照、警報 | ⬜ |
 | 08 | [08-update-cicd.md](08-update-cicd.md) | 更新流程；選用 GitHub Actions 自動部署 | ⬜ |
 | 09 | [09-cost.md](09-cost.md) | 費用明細、各方案試算、查價來源 | 參考 |
 | 10 | [10-stage-b-fargate.md](10-stage-b-fargate.md) | 之後升級到 ECS Fargate + RDS + ALB 的規劃 | 未來 |
+| 紀錄 | [local-to-lightsail.md](local-to-lightsail.md) | 2026-11-02 從本機到 Lightsail 的實際部署過程（03 後半 + 04） | 參考 |
 
 ## 前置條件
 
