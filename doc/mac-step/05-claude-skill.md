@@ -86,7 +86,7 @@ allowed-tools:
 
 ## 完成條件
 
-- [ ] `/english-tutor-plugin:english-check` 可用，Claude 依 Skill 的步驟執行（SKILL.md 的流程已在 session 內手動跑過；plugin 需 push 到 GitHub 並安裝後，重開 Claude Code 由使用者確認）
+- [x] `/english-tutor-plugin:english-check` 可用，Claude 依 Skill 的步驟執行（plugin 1.0.0 安裝後以 `claude -p` 新程序實測，見實作紀錄）
 - [x] 連續多句測試後，`error_types` 沒有明顯同義重複（四個類型：plural、subject-verb agreement、tense、word choice）
 - [x] 正確句的處理方式已定義並測過（存入 id 22，errors 為空）
 
@@ -109,6 +109,19 @@ allowed-tools:
 
 **限制**
 - Skill 清單在 Claude Code 啟動時載入，本 session 看不到新 Skill，所以是依 SKILL.md 的步驟手動呼叫 MCP 工具驗證。請重開 Claude Code 後實際輸入 `/english-check <句子>` 確認一次。
+
+### 2026-11-02（plugin 安裝後實測）
+
+- `claude plugin marketplace update` → `claude plugin install english-tutor-plugin@lesh-marketplace` 成功，快取在 `~/.claude/plugins/cache/lesh-marketplace/english-tutor-plugin/1.0.0/`，內容與 marketplace 來源一致。
+- 既有的 Claude Code session 看不到新 skill（`Unknown skill`），改用新程序測：
+
+```bash
+env -u CLAUDECODE claude -p "/english-tutor-plugin:english-check I goes to school everyday." \
+  --allowedTools "mcp__english-practice__list_error_types,mcp__english-practice__save_sentence"
+```
+
+- 結果：固定格式回覆、兩個錯誤 `subject-verb agreement`（goes → go）與 `word choice`（everyday → every day）都沿用既有類型、存入 id 23、`error_types` 仍只有四個。
+- `env -u CLAUDECODE` 是因為在 Claude Code 裡面再開 `claude -p` 會被巢狀檢查擋下；步驟 06 的 hook 也要這樣處理。
 
 **里程碑 M2 達成**：Claude 手動檢查一句英文 → 存進資料庫的完整流程可用。
 
