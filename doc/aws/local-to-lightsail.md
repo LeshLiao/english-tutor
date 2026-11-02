@@ -148,10 +148,31 @@ curl -m 3 http://44.228.11.180:8000/  # 連不上：Lightsail 防火牆只開 22
 **要注意**
 
 - **現在任何人開這個 IP 都能看到前端並透過它呼叫 API**（nginx 代為注入 key）。資料只是英文句子，但 05 的 basic auth 做好之前，不要把 IP 貼給別人。`/mcp` 不受影響，一直都要 key。
-- 伺服器登入訊息顯示 `*** System restart required ***`（11-01 更新 kernel 後尚未重開）。找個時間 `sudo reboot`，順便驗證 `restart: unless-stopped` 會把五個容器帶起來。這次沒有重開，因為會中斷 cmux 裡那個 SSH 面板。
-- 雲端資料庫是全新的，本機的句子沒有搬過去。要的話在本機 `pg_dump`、在伺服器 `psql` 匯入（07 的備份機制可以反過來用）。
+- ~~伺服器需要重開機~~ 使用者已於同日 `sudo reboot`；重開後五個容器靠 `restart: unless-stopped` 自動恢復，驗證通過。
+- ~~雲端資料庫是全新的，本機的句子沒有搬過去。~~ 已於同日搬移，見下方「把本機資料搬上雲端」。
 
 **下一步**：[05-domain-caddy-https.md](05-domain-caddy-https.md)（網域、HTTPS、basic auth）→ [06-claude-connect.md](06-claude-connect.md)（Claude Code 改連 `https://<domain>/mcp`）→ [07-backup-monitor.md](07-backup-monitor.md)。
+
+## 把本機資料搬上雲端（2026-11-02 同日完成）
+
+只搬三張資料表，不碰 `users`（雲端的 default 使用者已用雲端的 API key 建好；兩邊 id 都是 1，`sentences.user_id` 不用改）。
+
+```bash
+# Mac：只匯出資料，不含 schema（雲端 schema 由 alembic 建好）
+docker compose exec -T db pg_dump -U english -d english_practice --data-only \
+  --table=error_types --table=sentences --table=sentence_errors > english-tutor-data.sql
+scp english-tutor-data.sql english-tutor:/tmp/
+
+# Lightsail：單一交易匯入，任何錯誤整個回滾
+cd /srv/english-tutor
+docker compose -f docker-compose.prod.yml exec -T db psql -U english -d english_practice \
+  -v ON_ERROR_STOP=1 --single-transaction < /tmp/english-tutor-data.sql
+rm /tmp/english-tutor-data.sql
+```
+
+- `pg_dump --data-only` 會附 `setval`，序列會接著本機的 id 往下走，之後新句子不會撞 id。
+- 匯入前先確認雲端三張表是空的，否則 `COPY` 會因主鍵重複失敗（交易會回滾，不會留下半套資料）。
+- 結果：15 句、24 個錯誤、8 種類型；`http://44.228.11.180/api/stats/errors` 與本機完全相同。
 
 ## 之後怎麼更新一版
 
