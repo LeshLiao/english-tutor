@@ -14,7 +14,7 @@
 | 03 | [03-fastapi-backend.md](03-fastapi-backend.md) | FastAPI 後端：models、Alembic migration、第一版 API | ✅ |
 | 04 | [04-mcp-server.md](04-mcp-server.md) | MCP Server（stdio）：`list_error_types`、`save_sentence`，註冊到 Claude Code | ✅ |
 | 05 | [05-claude-skill.md](05-claude-skill.md) | Claude Skill：手動檢查句子並儲存，跑通完整流程（Skill 放在 lesh-marketplace 的 english-tutor-plugin） | ✅ |
-| 06 | [06-claude-hook.md](06-claude-hook.md) | UserPromptSubmit Hook：自動偵測英文句子、背景分析 | 🔄 已實作並以 stdin 測過，待重開 session 在對話內確認 |
+| 06 | [06-claude-hook.md](06-claude-hook.md) | UserPromptSubmit Hook：自動偵測英文句子、背景分析 | ✅ |
 | 07 | [07-remaining-tools-and-api.md](07-remaining-tools-and-api.md) | 補齊其餘 MCP 工具與 API（stats、search、recent） | ⬜ |
 | 08 | [08-react-frontend.md](08-react-frontend.md) | React 前端三個頁面：總覽、列表、詳情 | ⬜ |
 | 09 | [09-mcp-http-mode.md](09-mcp-http-mode.md) | MCP Server 改 Streamable HTTP 跑在容器裡，為上雲做準備 | ⬜ |

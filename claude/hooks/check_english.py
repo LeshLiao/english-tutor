@@ -3,8 +3,10 @@
 in the background with `claude -p`, saving the result through the english-practice
 MCP server (source = hook). Standard library only, so any python3 can run it.
 
-Exit 0 with empty stdout in every case so the main conversation is never blocked
-or polluted with extra context.
+Exit 0 in every case so the main conversation is never blocked. When a prompt is
+skipped, stdout stays empty. When an analysis is actually spawned, print a JSON
+``systemMessage`` so Claude Code shows a one-line "✨" notice in the conversation;
+the message is shown to the user only and is not added to Claude's context.
 """
 from __future__ import annotations
 
@@ -156,7 +158,14 @@ def main() -> None:
             start_new_session=True,
         )
     log(f"spawned pid {proc.pid} via {claude_bin} -> {child_log.name}: {text[:80]!r}")
+    notify(text)
     sys.exit(0)
+
+
+def notify(text: str) -> None:
+    """Show a short "✨" line in the conversation so the user can see the hook fired."""
+    preview = text if len(text) <= 60 else text[:57] + "..."
+    print(json.dumps({"systemMessage": f"\u2728 English hook: analysing in background: {preview}"}, ensure_ascii=False))
 
 
 if __name__ == "__main__":
