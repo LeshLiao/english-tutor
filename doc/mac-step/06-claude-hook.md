@@ -131,3 +131,13 @@ echo '{"prompt":"const x = 1;"}' | python3 claude/hooks/check_english.py
 - 2026-11-02 18:34 加上 `✨` 提示：hook 送出分析時印 `systemMessage`，使用者在對話中看得到；略過時維持安靜。stdin 測試通過，待下次重開 session 在對話內確認顯示效果。
 - 背景 `claude -p` 用的是預設模型。若覺得每句都用大模型太貴，可在 script 的 `Popen` 參數加 `--model haiku`。
 - **決定（2026-11-02）**：hook 先維持專案層級。Plugin 可放 `hooks/hooks.json`（路徑用 `${CLAUDE_PLUGIN_ROOT}`），但搬過去後會在所有專案觸發，且 `english-practice` MCP 目前是 local scope、其他專案找不到工具。等 [09](09-mcp-http-mode.md) 改成 HTTP 模式後，plugin 只需 `.mcp.json` 放一個 URL 即可，屆時再把 hook 與 MCP 設定一起搬進 lesh-marketplace 的 english-tutor-plugin。
+
+### 2026-11-02（晚間：hook 搬進 english-tutor-plugin 1.2.0）
+
+MCP 改成 HTTP 並連 Lightsail 後（[09](09-mcp-http-mode.md)、aws 06），hook 不再依賴本機路徑，依原定計畫搬進 marketplace 的 plugin：
+
+- `plugins/english-tutor-plugin/hooks/hooks.json` + `hooks/check_english.py`（`${CLAUDE_PLUGIN_ROOT}`），log 改寫到 `~/.claude/english-tutor-hook/logs/`（plugin 快取目錄更新時會被換掉）。
+- `plugins/english-tutor-plugin/.mcp.json`：`english-practice` → `http://44.228.11.180/mcp`，header `X-API-Key: ${ENGLISH_PRACTICE_API_KEY}`；key 放在 `~/.claude/settings.json` 的 `env`，不進 git。
+- plugin 提供的 MCP 工具名稱變成 `mcp__plugin_english-tutor-plugin_english-practice__*`，三個 Skill 的 `allowed-tools` 與 hook 的 `--allowedTools` 一併改名。
+- 本 repo 的 `.claude/settings.json` 與 `claude/hooks/` 已刪除，local scope 的 `english-practice` 註冊已移除，避免重複觸發與工具重複。
+- 驗證：在 lesh-marketplace 專案目錄 `claude -p` 跑 english-check → 雲端 id 51；以 stdin 模擬 hook → 雲端 id 52、`source = hook`。現在任何專案、任何裝了 plugin 並設好 env 的機器都會自動檢查。

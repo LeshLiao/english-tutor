@@ -84,3 +84,4 @@ claude mcp list        # english-practice: http://44.228.11.180/mcp (HTTP) - ✔
 - 風險：05 之前 API key 以明文經 HTTP 走公網。資料只是英文句子，且 key 可隨時在伺服器 `.env` 換掉並 `up -d` 重啟。
 - 05 設好網域後，只要把上面的網址換成 `https://<domain>/mcp` 再跑一次 `claude mcp remove` / `add`。
 - 本機的 `docker compose --profile http` mcp 容器此時不再被 Claude Code 使用，可停掉；要回本機開發時把網址換回 `http://localhost:8001/mcp` 與 `dev-local-key`。
+- 同日稍後：連線設定改由 plugin 的 `.mcp.json` 提供（見 [mac-step/06](../mac-step/06-claude-hook.md) 的晚間紀錄），`claude mcp add` 的 local scope 註冊已移除。之後換網域只要改 plugin 的 `.mcp.json` 並升版。
