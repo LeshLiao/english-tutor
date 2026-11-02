@@ -52,10 +52,10 @@ docker compose exec backend pytest -v
 
 ## 完成條件
 
-- [ ] 五個 MCP 工具 + `dismiss_sentence` 都在 `/mcp` 列表中且可用
-- [ ] 統計正確排除已 dismiss 的句子
-- [ ] pytest 全綠
-- [ ] 三個 Skill 都可用
+- [x] 五個 MCP 工具 + `dismiss_sentence` 都在 `/mcp` 列表中且可用（以 stdio client 列出 6 個工具並逐一呼叫，見實作紀錄）
+- [x] 統計正確排除已 dismiss 的句子（pytest `test_dismiss_excludes_from_list_and_stats` + stdio 實測）
+- [x] pytest 全綠（9 passed）
+- [x] 三個 Skill 都可用（plugin 1.1.0，`claude -p` 新程序實測）
 
 ## 下一步
 
@@ -63,3 +63,21 @@ docker compose exec backend pytest -v
 
 ## 實作紀錄
 
+### 2026-11-02（Claude Code 協助）
+
+**完成內容**
+- backend：`GET /sentences` 補 `q`（ILIKE 比對原句與修正句，不分大小寫）；新增 `PATCH /sentences/{id}`（body `{"is_dismissed": bool}`，可標記與取消）；新增 `GET /stats/trend?interval=day|week&from&to`，用 `date_trunc` 分組回傳 `period`、`sentence_count`、`error_count`，排除已 dismiss。`GET /sentences/{id}` 與 `GET /stats/errors` 在 03 就已存在。
+- tests：新增關鍵字搜尋、dismiss 排除列表與統計（含取消、404、422）、trend 按日/週分組三個測試；`docker compose exec backend pytest` 9 passed。
+- mcp-server：新增 `get_error_stats(from_date?, to_date?)`、`search_sentences(error_type?, keyword?, limit, include_dismissed)`、`get_recent_mistakes(limit)`（後端沒有「只要有錯」的篩選，多抓 3 倍再本地過濾）、`dismiss_sentence(sentence_id, dismissed=True)`；回傳統一經 `_summarize` 精簡成 Claude 好讀的形狀。server instructions 補上各工具的使用時機。
+- Skill（lesh-marketplace `english-tutor-plugin` 1.0.0 → 1.1.0，已 push 並 `claude plugin update`）：`english-check` 第 1 步改為同時呼叫 `list_error_types` 與 `get_recent_mistakes`，第 5 步對重複的錯誤類型加註「（最近第 N 次犯 X 錯誤）」；新增 `english-stats [期間]`（表格 + 前三名各附一個最近例子 + 一句建議）與 `english-review [error_type] [count]`（兩回合：先只給原句讓使用者重寫，再對照儲存的修正句評分）。
+
+**實測**
+- stdio client 列出工具：`list_error_types, save_sentence, get_error_stats, search_sentences, get_recent_mistakes, dismiss_sentence`。`dismiss_sentence(26)` 後統計變動，`dismissed=False` 還原；id 999999 回 404 轉成 ToolError。
+- `claude -p "/english-tutor-plugin:english-stats"` → 表格 6 種類型共 15 次，word choice 5 次居首。
+- `claude -p "/english-tutor-plugin:english-review 2"` → 只列出 id 17、20 的原句，沒有洩漏修正。
+- `claude -p "/english-tutor-plugin:english-check She go to school everyday."` → 存成 id 37，兩個錯誤分別標示「最近第 5 次犯 subject-verb agreement」「最近第 6 次犯 word choice」。
+
+**限制 / 待確認**
+- 新 MCP 工具在目前的 Claude Code session 看不到（stdio server 在 session 啟動時載入），重開後才會出現在 `/mcp`。
+- `get_recent_mistakes` 的「最近第 N 次」是以回傳的前 10 句計算，不是嚴格的時間窗。
+- 測試 hook 時又存了一筆重複的「I goes to school everyday.」（id 27），可用 `dismiss_sentence(27)` 排除。

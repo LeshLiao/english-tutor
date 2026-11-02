@@ -87,3 +87,48 @@ def test_list_get_and_stats(client, auth, sample, type_name):
     assert stats == [
         {"error_type_id": created["errors"][0]["error_type"]["id"], "error_type": type_name, "count": 1}
     ]
+
+
+def test_keyword_search(client, auth, sample):
+    created = client.post("/sentences", json=sample, headers=auth).json()
+    client.post("/sentences", json={**sample, "original_text": "She like cats.", "corrected_text": "She likes cats.", "errors": []}, headers=auth)
+
+    hits = client.get("/sentences", params={"q": "SCHOOL"}, headers=auth).json()  # 不分大小寫
+    assert [s["id"] for s in hits] == [created["id"]]
+    assert client.get("/sentences", params={"q": "went"}, headers=auth).json()[0]["id"] == created["id"]  # 比對修正句
+    assert client.get("/sentences", params={"q": "zzz-nothing"}, headers=auth).json() == []
+
+
+def test_dismiss_excludes_from_list_and_stats(client, auth, sample, type_name):
+    created = client.post("/sentences", json=sample, headers=auth).json()
+    assert client.get("/stats/errors", headers=auth).json()[0]["count"] == 1
+
+    r = client.patch(f"/sentences/{created['id']}", json={"is_dismissed": True}, headers=auth)
+    assert r.status_code == 200
+    assert r.json()["is_dismissed"] is True
+
+    assert client.get("/sentences", headers=auth).json() == []
+    assert [s["id"] for s in client.get("/sentences", params={"include_dismissed": True}, headers=auth).json()] == [created["id"]]
+    assert client.get("/stats/errors", headers=auth).json() == []
+    assert client.get("/stats/trend", headers=auth).json() == []
+
+    # 取消標記後恢復
+    client.patch(f"/sentences/{created['id']}", json={"is_dismissed": False}, headers=auth)
+    assert client.get("/stats/errors", headers=auth).json()[0]["error_type"] == type_name
+
+    assert client.patch("/sentences/999999", json={"is_dismissed": True}, headers=auth).status_code == 404
+    assert client.patch(f"/sentences/{created['id']}", json={}, headers=auth).status_code == 422
+
+
+def test_trend_groups_by_day_and_week(client, auth, sample):
+    client.post("/sentences", json=sample, headers=auth)  # 1 error
+    client.post("/sentences", json={**sample, "original_text": "It is correct.", "corrected_text": "It is correct.", "errors": []}, headers=auth)  # 0 errors
+
+    day = client.get("/stats/trend", headers=auth).json()
+    assert len(day) == 1
+    assert day[0]["sentence_count"] == 2
+    assert day[0]["error_count"] == 1
+
+    week = client.get("/stats/trend", params={"interval": "week"}, headers=auth).json()
+    assert len(week) == 1 and week[0]["sentence_count"] == 2
+    assert client.get("/stats/trend", params={"interval": "month"}, headers=auth).status_code == 422

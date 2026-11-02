@@ -43,9 +43,11 @@ MCP_TRANSPORT = os.environ.get("MCP_TRANSPORT", "stdio")
 mcp = MCPServer(
     name="english-practice",
     instructions=(
-        "Tools for recording the user's English mistakes. "
+        "Tools for recording and reviewing the user's English mistakes. "
         "Always call list_error_types before save_sentence so that error type names are reused "
-        "instead of inventing synonyms."
+        "instead of inventing synonyms. Use get_error_stats for 'what do I get wrong most', "
+        "search_sentences / get_recent_mistakes to review past sentences, and dismiss_sentence "
+        "when the user says a recorded sentence was a false positive."
     ),
 )
 
@@ -132,6 +134,104 @@ def save_sentence(
         "error_types_used": sorted({e["error_type"]["name"] for e in data["errors"]}),
         "error_count": len(data["errors"]),
     }
+
+
+def _summarize(sentence: dict) -> dict:
+    """把後端的句子 JSON 精簡成 Claude 好讀的形狀。"""
+    return {
+        "id": sentence["id"],
+        "created_at": sentence["created_at"],
+        "source": sentence["source"],
+        "original_text": sentence["original_text"],
+        "corrected_text": sentence["corrected_text"],
+        "explanation": sentence["explanation"],
+        "is_dismissed": sentence["is_dismissed"],
+        "errors": [
+            {
+                "error_type": e["error_type"]["name"],
+                "error_snippet": e["error_snippet"],
+                "suggestion": e["suggestion"],
+            }
+            for e in sentence["errors"]
+        ],
+    }
+
+
+@mcp.tool()
+def get_error_stats(from_date: str | None = None, to_date: str | None = None) -> list[dict]:
+    """Count how many times each error type occurred, most frequent first.
+
+    Dismissed (false-positive) sentences are excluded. Use this to answer
+    "what mistakes do I make most often?".
+
+    Args:
+        from_date: Optional ISO date/datetime (e.g. '2026-10-01'); only count sentences saved on or after it.
+        to_date: Optional ISO date/datetime; only count sentences saved on or before it.
+
+    Returns a list of {error_type, count}, empty when nothing has been recorded.
+    """
+    params = {k: v for k, v in (("from", from_date), ("to", to_date)) if v}
+    return [
+        {"error_type": row["error_type"], "count": row["count"]}
+        for row in _request("GET", "/stats/errors", params=params)
+    ]
+
+
+@mcp.tool()
+def search_sentences(
+    error_type: str | None = None,
+    keyword: str | None = None,
+    limit: int = 20,
+    include_dismissed: bool = False,
+) -> list[dict]:
+    """Search previously saved sentences for review, newest first.
+
+    Args:
+        error_type: Only sentences containing this error type (use a name from list_error_types).
+        keyword: Case-insensitive substring matched against the original and corrected text.
+        limit: Maximum number of sentences to return (1-100).
+        include_dismissed: Also return sentences marked as false positives.
+
+    Returns each sentence with its id, texts, explanation and the list of errors.
+    """
+    params: dict = {"limit": max(1, min(limit, 100)), "include_dismissed": include_dismissed}
+    if error_type:
+        params["error_type"] = error_type
+    if keyword:
+        params["q"] = keyword
+    return [_summarize(s) for s in _request("GET", "/sentences", params=params)]
+
+
+@mcp.tool()
+def get_recent_mistakes(limit: int = 10) -> list[dict]:
+    """Return the user's most recent sentences that contained at least one error, newest first.
+
+    Call this before checking a new sentence so you can point out when the user repeats
+    a mistake they made recently (e.g. "this is the 3rd tense error this week").
+
+    Args:
+        limit: Maximum number of sentences to return (1-50).
+
+    Returns the same shape as search_sentences; correct sentences and dismissed ones are skipped.
+    """
+    limit = max(1, min(limit, 50))
+    # 後端沒有「只要有錯的句子」篩選，多抓一些再在本地過濾
+    rows = _request("GET", "/sentences", params={"limit": min(limit * 3, 500)})
+    return [_summarize(s) for s in rows if s["errors"]][:limit]
+
+
+@mcp.tool()
+def dismiss_sentence(sentence_id: int, dismissed: bool = True) -> dict:
+    """Mark a saved sentence as a false positive so it no longer counts in statistics or reviews.
+
+    Args:
+        sentence_id: The id returned by save_sentence or shown in search results.
+        dismissed: True to dismiss (default); False to undo a previous dismissal.
+
+    Returns the sentence id and its new is_dismissed value.
+    """
+    data = _request("PATCH", f"/sentences/{sentence_id}", json={"is_dismissed": dismissed})
+    return {"sentence_id": data["id"], "is_dismissed": data["is_dismissed"]}
 
 
 if __name__ == "__main__":

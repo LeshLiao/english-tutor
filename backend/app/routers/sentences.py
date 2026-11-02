@@ -1,13 +1,13 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
 from app.db import get_db
 from app.models import ErrorType, Sentence, SentenceError, User
-from app.schemas import SentenceCreate, SentenceOut
+from app.schemas import SentenceCreate, SentenceOut, SentenceUpdate
 
 router = APIRouter(prefix="/sentences", tags=["sentences"])
 
@@ -50,6 +50,7 @@ def create_sentence(
 @router.get("", response_model=list[SentenceOut])
 def list_sentences(
     error_type: str | None = Query(None, description="依錯誤類型名稱篩選"),
+    q: str | None = Query(None, min_length=1, description="關鍵字，不分大小寫比對原句與修正句"),
     from_: datetime | None = Query(None, alias="from"),
     to: datetime | None = None,
     limit: int = Query(50, ge=1, le=500),
@@ -65,6 +66,9 @@ def list_sentences(
         stmt = stmt.where(
             Sentence.errors.any(SentenceError.error_type.has(ErrorType.name == error_type.strip().lower()))
         )
+    if q:
+        pattern = f"%{q.strip()}%"
+        stmt = stmt.where(or_(Sentence.original_text.ilike(pattern), Sentence.corrected_text.ilike(pattern)))
     if from_:
         stmt = stmt.where(Sentence.created_at >= from_)
     if to:
@@ -73,13 +77,32 @@ def list_sentences(
     return db.scalars(stmt).all()
 
 
+def _get_own_sentence(db: Session, user: User, sentence_id: int) -> Sentence:
+    sentence = db.get(Sentence, sentence_id)
+    if sentence is None or sentence.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Sentence not found")
+    return sentence
+
+
 @router.get("/{sentence_id}", response_model=SentenceOut)
 def get_sentence(
     sentence_id: int,
     db: Session = Depends(get_db),
     user: User = Depends(get_current_user),
 ):
-    sentence = db.get(Sentence, sentence_id)
-    if sentence is None or sentence.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Sentence not found")
+    return _get_own_sentence(db, user, sentence_id)
+
+
+@router.patch("/{sentence_id}", response_model=SentenceOut)
+def update_sentence(
+    sentence_id: int,
+    payload: SentenceUpdate,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    """更新 is_dismissed（標記誤判或取消標記）。"""
+    sentence = _get_own_sentence(db, user, sentence_id)
+    sentence.is_dismissed = payload.is_dismissed
+    db.commit()
+    db.refresh(sentence)
     return sentence

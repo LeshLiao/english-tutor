@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -53,10 +53,20 @@ class SentenceOut(BaseModel):
     errors: list[SentenceErrorOut]
 
 
+class SentenceUpdate(BaseModel):
+    is_dismissed: bool = Field(..., description="true = 標記為誤判，之後不列入統計與列表")
+
+
 class ErrorStat(BaseModel):
     error_type_id: int
     error_type: str
     count: int
+
+
+class TrendPoint(BaseModel):
+    period: date = Field(description="該區間的起始日（day 為當天，week 為週一）")
+    sentence_count: int = Field(description="該區間儲存的句子數（排除已 dismiss）")
+    error_count: int = Field(description="該區間的錯誤數（排除已 dismiss）")
 
 
 class HealthOut(BaseModel):
