@@ -1,0 +1,16 @@
+# 暫時版：只用 IP 走 HTTP 80。doc/aws/05 設好網域後換成 {$DOMAIN} 區塊 + HTTPS + basic auth。
+#
+# 路由：
+#   /mcp*  → mcp:8001      Claude Code 自帶 X-API-Key，由 mcp 容器驗證
+#   其餘   → frontend:80   nginx 提供 React 靜態檔，並把 /api/* 代理到 backend:8000（注入 X-API-Key）
+:80 {
+    encode gzip
+
+    handle /mcp* {
+        reverse_proxy mcp:8001
+    }
+
+    handle {
+        reverse_proxy frontend:80
+    }
+}
