@@ -132,3 +132,12 @@ def test_trend_groups_by_day_and_week(client, auth, sample):
     week = client.get("/stats/trend", params={"interval": "week"}, headers=auth).json()
     assert len(week) == 1 and week[0]["sentence_count"] == 2
     assert client.get("/stats/trend", params={"interval": "month"}, headers=auth).status_code == 422
+
+
+def test_cors_allows_vite_dev_server(client):
+    r = client.options(
+        "/health",
+        headers={"Origin": "http://localhost:5173", "Access-Control-Request-Method": "GET"},
+    )
+    assert r.status_code == 200
+    assert r.headers["access-control-allow-origin"] == "http://localhost:5173"

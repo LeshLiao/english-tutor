@@ -59,10 +59,10 @@ compose 裡 `frontend` 服務用 `profiles: ["prod"]`，開發時不啟動。
 
 ## 完成條件
 
-- [ ] 三個頁面都可用，資料與 API 一致
-- [ ] 篩選、分頁、誤判標記正常
-- [ ] `npm run build` 無錯誤
-- [ ] （選用）`docker compose --profile prod up` 可在 http://localhost:3000 看到頁面
+- [x] 三個頁面都可用，資料與 API 一致（瀏覽器實測，總覽長條圖 6+5+2+2+1+1 = 17 與 `/stats/errors` 相同）
+- [x] 篩選、分頁、誤判標記正常（篩 `tense` 剩 2 句；詳情頁標記 id 27 後總覽錯誤總數 17 → 15）
+- [x] `npm run build` 無錯誤（`tsc -b && vite build`，oxlint 也乾淨）
+- [x] （選用）`docker compose --profile prod up` 可在 http://localhost:**3001** 看到頁面（3000 被 open-webui 佔用）
 
 ## 下一步
 
@@ -70,3 +70,21 @@ compose 裡 `frontend` 服務用 `profiles: ["prod"]`，開發時不啟動。
 
 ## 實作紀錄
 
+### 2026-11-02（Claude Code 協助）
+
+**完成內容**
+- `npx create-vite@latest frontend --template react-ts`（Vite 8、React 19、TypeScript 7、oxlint），再裝 `react-router-dom`、`@tanstack/react-query`、`recharts`。
+- API 路徑統一走 `/api/*`：開發時 `vite.config.ts` 的 proxy 把 `/api` 轉到 `http://localhost:8000` 並去掉前綴；容器版由 nginx 做同一件事。`VITE_API_URL` 仍可覆寫成直連後端（此時才需要 CORS）。
+- API key：`frontend/.env.development` 放 `VITE_API_KEY=dev-local-key`（與根目錄 `.env` 相同，是公開的開發預設值所以有進 git）。容器版 **不把 key 打進 bundle**：Dockerfile 把 `VITE_API_KEY` 清空，改由 nginx `proxy_set_header X-API-Key "${API_KEY}"` 注入，compose 的 `frontend` 服務從 `.env` 拿 `API_KEY`。驗證：`grep dev-local-key dist/assets/*.js` 無結果。
+- backend：`config.py` 加 `cors_origins`（預設 5173、5174），`main.py` 掛 `CORSMiddleware`；pytest 補 preflight 測試，10 passed。
+- 頁面：
+  - `/` 總覽：四個數字方塊（錯誤類型數、錯誤總數、最近 30 天句子/錯誤）、各錯誤類型橫向長條圖、最近 30 天趨勢折線（後端只回有資料的日子，前端補 0）、最近 5 筆表格。
+  - `/sentences` 列表：錯誤類型下拉（來自 `/error-types`）、日期從/到、關鍵字、顯示已誤判的核取方塊，條件都放在 URL query string 可分享；每頁 20 筆，回傳滿 20 筆才開放下一頁。
+  - `/sentences/:id` 詳情：原句與修正句並排，自寫 LCS 字詞 diff（`src/diff.ts`）紅刪綠增；說明、錯誤清單（類型可點回列表篩選）；「標記為誤判 / 取消誤判標記」按鈕，成功後 invalidate 列表與統計的 query。
+- 圖表顏色依 dataviz 指引：單一序列用 blue `#2a78d6`，趨勢兩條線 blue + orange，light/dark 兩組都跑過 `validate_palette.js` 全數 PASS；暗色模式用 `prefers-color-scheme`。
+- `frontend/Dockerfile` 兩階段（node:22-alpine → nginx:alpine）、`nginx.conf.template`（SPA fallback + `/api/` 代理 + key 注入）、compose 加 `frontend` 服務（`profiles: ["prod"]`，port 3001）。`docker compose --profile prod build frontend` 在 Apple Silicon 直接成功。
+
+**限制 / 待確認**
+- bundle 748 kB（recharts 佔大半），Vite 提示可 code-split；個人使用先不處理。
+- 趨勢圖的「日」是後端 `date_trunc` 的 UTC 日期，前端補 0 時用本地日期；台灣時間 08:00 前存的句子會算到前一天。等上雲或資料量大時再改成傳 timezone。
+- 列表的「第 N 頁」沒有總筆數（API 沒回 total），只能用「滿 20 筆就有下一頁」判斷。

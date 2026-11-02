@@ -9,6 +9,8 @@ class Settings(BaseSettings):
     )
     api_key: str = "dev-local-key"
     default_user_name: str = "default"
+    # 逗號分隔的允許來源；Vite dev server 預設 5173，被佔用時會跳到 5174
+    cors_origins: str = "http://localhost:5173,http://localhost:5174"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 

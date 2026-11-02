@@ -35,6 +35,17 @@ services:
       timeout: 5s
       retries: 5
 
+  frontend:
+    build: ./frontend
+    environment:
+      API_KEY: ${API_KEY}       # nginx 用這個注入 X-API-Key
+    ports:
+      - "3001:80"               # 本機 3000 被 open-webui 佔用
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles: ["prod"]          # 開發時用 npm run dev，不啟動這個
+
   adminer:
     image: adminer
     ports:
