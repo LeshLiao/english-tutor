@@ -1,6 +1,9 @@
 # 09. 費用明細與各方案試算
 
 查價日期：**2026-11-01**。區域為 Oregon（us-west-2），單位美元，每月以 730 小時計。
+
+> **2026-11-07 更新**：實際已改用 **Tokyo Lightsail $24**（2 vCPU / 4 GB / 80 GB / 4 TB），Lightsail 各區域同價，故月費約 **$25**（$24 + 快照）。
+> 下文的 EC2 / RDS / Fargate 試算仍以 Oregon 為準；東京版約貴 20%。
 台幣換算假設 1 USD = 32 TWD，僅供感覺用。上線前請用 https://calculator.aws 再算一次。
 
 ## 一、方案 A：Lightsail 單機（推薦起步）

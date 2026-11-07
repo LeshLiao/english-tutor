@@ -7,13 +7,14 @@ Claude Code 透過公開網址連線 MCP Server。程式碼與本機版完全相
 並與 [hostinger/](../hostinger/00-README.md) 平行：兩邊都是「單台機器 + Docker Compose」，只是機器換成 AWS。
 
 > 價格皆為 2026-11-01 上網查到的美金價（Oregon 區域，us-west-2），細節與來源見 [09-cost.md](09-cost.md)。
+> **目前狀態（2026-11-07）**：已從 Oregon $12 搬到 **Tokyo（ap-northeast-1）$24**（2 vCPU / 4 GB / 80 GB），靜態 IP `35.79.82.165`，過程見 [oregon-to-tokyo.md](oregon-to-tokyo.md)。Lightsail 各區域同價。
 > 開始前請再到 AWS 價格頁或 Pricing Calculator 確認一次。
 
 ## 三種方案比較
 
 | 方案 | 架構 | 每月約 | 適合 |
 |------|------|--------|------|
-| **A. Lightsail（推薦起步）** | 一台 Lightsail $12 VPS（2 vCPU / 2 GB / 60 GB / 3 TB 流量，含 IPv4）跑 Docker Compose | **$13** | 個人使用、先跑起來 |
+| **A. Lightsail（推薦起步）** | 一台 Lightsail VPS 跑 Docker Compose。起步 $12（2 vCPU / 2 GB / 60 GB / 3 TB），**現為 $24（2 vCPU / 4 GB / 80 GB / 4 TB）** | **$13 → $25** | 個人使用、先跑起來 |
 | A'. EC2 | 一台 t4g.small + EBS + 公開 IPv4，其餘同 A | $19 | 之後要接 VPC 內其他服務，或想用台北區域（Lightsail 沒有台北） |
 | B. Lightsail + 託管資料庫 | A 的 VPS + Lightsail Managed PostgreSQL（$15） | $28 | 想要資料庫自動備份、不想自己顧 Postgres |
 | C. ECS Fargate + RDS + ALB | 正統無伺服器容器架構，見 [10-stage-b-fargate.md](10-stage-b-fargate.md) | $60–75 | 多人使用、要高可用、想練 AWS 正規架構 |
@@ -56,17 +57,19 @@ Lightsail 警報 ──▶ Email
 
 | # | 檔案 | 目標 | 狀態 |
 |---|------|------|------|
-| 01 | [01-account-region-budget.md](01-account-region-budget.md) | 帳號安全檢查、IAM 使用者、確認區域（Oregon）、設 Budgets 警報 | ⬜ |
-| 02 | [02-lightsail-instance.md](02-lightsail-instance.md) | 在 Oregon 建立 Lightsail $12 實例、靜態 IP、防火牆、SSH 登入、裝 Docker | ✅ |
+| 01 | [01-account-region-budget.md](01-account-region-budget.md) | 帳號安全檢查、IAM 使用者、確認區域（起步 Oregon，現為 Tokyo）、設 Budgets 警報 | ⬜ |
+| 02 | [02-lightsail-instance.md](02-lightsail-instance.md) | 建立 Lightsail 實例、靜態 IP、防火牆、SSH 登入、裝 Docker（原 Oregon $12，2026-11-07 改為 Tokyo $24） | ✅ |
 | 03 | [03-server-setup.md](03-server-setup.md) | 系統更新、swap、clone repo、正式版 `.env` | ✅ |
 | 04 | [04-compose-prod.md](04-compose-prod.md) | `docker-compose.prod.yml` 在 Lightsail 上 build 並啟動 | ✅ |
 | 05 | [05-domain-caddy-https.md](05-domain-caddy-https.md) | Route 53（或既有註冊商）DNS、Caddy 反向代理、HTTPS | ⬜ |
-| 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | 🔶 暫以 `http://44.228.11.180/mcp` 連線並通過回歸；05 後換 https |
+| 06 | [06-claude-connect.md](06-claude-connect.md) | Claude Code 改連 `https://<domain>/mcp`，回歸測試 | 🔶 暫以 `http://35.79.82.165/mcp` 連線（plugin 1.2.1）；05 後換 https |
 | 07 | [07-backup-monitor.md](07-backup-monitor.md) | pg_dump 到 S3、Lightsail 自動快照、警報 | ⬜ |
 | 08 | [08-update-cicd.md](08-update-cicd.md) | 更新流程；選用 GitHub Actions 自動部署 | ⬜ |
 | 09 | [09-cost.md](09-cost.md) | 費用明細、各方案試算、查價來源 | 參考 |
 | 10 | [10-stage-b-fargate.md](10-stage-b-fargate.md) | 之後升級到 ECS Fargate + RDS + ALB 的規劃 | 未來 |
 | 紀錄 | [local-to-lightsail.md](local-to-lightsail.md) | 2026-11-02 從本機到 Lightsail 的實際部署過程（03 後半 + 04） | 參考 |
+| 紀錄 | [oregon-to-tokyo.md](oregon-to-tokyo.md) | 2026-11-07 用快照從 Oregon $12 升級並搬到 Tokyo $24，靜態 IP 換成 35.79.82.165 | 參考 |
+| 選用 | [xfce-desktop.md](xfce-desktop.md) | 在同一台 Lightsail 裝 XFCE 桌面，走 SSH tunnel 用 xrdp 遠端連線 | 參考 |
 
 ## 前置條件
 

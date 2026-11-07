@@ -40,7 +40,7 @@ docker compose -f docker-compose.prod.yml exec db psql -U english -d english_pra
 
 ### 6-3. 延遲觀察
 
-Oregon 到台灣約 130–160 ms，Hook 在背景執行所以感覺不到；
+Oregon 到台灣約 130–160 ms（2026-11-07 搬到 Tokyo 後約 35–50 ms），Hook 在背景執行所以感覺不到；
 手動 `/english-check` 一次工具呼叫來回幾趟，比本機多約 0.5–1 秒，屬正常；
 `/english-check` 若明顯變慢，到 Lightsail 實例頁 Metrics 看 CPU 與 burst capacity，平時應在 5% 以下。
 
@@ -76,8 +76,9 @@ claude mcp add --transport http english-practice http://localhost:8001/mcp --hea
 ```bash
 KEY=$(ssh english-tutor "grep '^API_KEY=' /srv/english-tutor/.env | cut -d= -f2")   # 不要 echo
 claude mcp remove english-practice
-claude mcp add --transport http english-practice http://44.228.11.180/mcp --header "X-API-Key: $KEY"
-claude mcp list        # english-practice: http://44.228.11.180/mcp (HTTP) - ✔ Connected
+claude mcp add --transport http english-practice http://35.79.82.165/mcp --header "X-API-Key: $KEY"
+claude mcp list        # english-practice: http://35.79.82.165/mcp (HTTP) - ✔ Connected
+# 2026-11-02 時為 http://44.228.11.180/mcp（Oregon）；2026-11-07 起改為 Tokyo 的 35.79.82.165，plugin 1.2.1 已內建
 ```
 
 - 回歸：`claude -p "/english-tutor-plugin:english-check She have two cat."` → 雲端 id 50、`source = skill`；本機資料庫沒有新增，確認走的是 Lightsail。Hook 用同一個註冊，不用改。

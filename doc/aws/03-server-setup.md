@@ -5,7 +5,7 @@
 系統更新、自動安全更新、加 swap、把 repo clone 到機器上、建立正式版 `.env`。
 
 與 [hostinger/02-server-setup.md](../hostinger/02-server-setup.md) 幾乎相同，差異只有：
-Lightsail 的防火牆在 Console 設（02 已做），機器內可不裝 ufw；記憶體只有 2 GB，swap 一定要加。
+Lightsail 的防火牆在 Console 設（02 已做），機器內可不裝 ufw；記憶體只有 2 GB（2026-11-07 後為 4 GB），swap 一定要加。
 
 ## 前置條件
 
@@ -35,7 +35,7 @@ Lightsail Console 的防火牆（02-4）已經是第一道門，而且在實例�
 仍要遵守：**compose 裡除了 caddy 以外的服務都不要寫 `ports:`**（04 會處理）。
 就算 Lightsail 防火牆擋住，也不要讓 5432/8000/8001 在機器上監聽公開介面。
 
-### 3-3. Swap（2 GB RAM，必加）
+### 3-3. Swap（2 GB RAM 必加；升到 4 GB 後仍保留）
 
 ```bash
 fallocate -l 2G /swapfile

@@ -35,20 +35,22 @@
 
 > 正規做法是 IAM Identity Center（SSO），但個人一人用一個 IAM user 就夠。
 
-### 1-4. 區域：Oregon（us-west-2）
+### 1-4. 區域：Oregon（us-west-2）→ 2026-11-07 改為 Tokyo（ap-northeast-1）
 
-這個帳號的其他專案都在 Oregon，為了集中管理，本專案也放 Oregon。
+起步時選 Oregon（這個帳號的其他專案都在 Oregon，集中管理）。
+2026-11-07 升級方案時趁機用快照複製搬到東京，延遲從 130–160 ms 降到 35–50 ms，見 [oregon-to-tokyo.md](oregon-to-tokyo.md)。
+**之後新建的 S3、Route 53 health check 等資源一律放 ap-northeast-1。**
 
 | 區域 | 代碼 | Lightsail | 台灣延遲 | 說明 |
 |------|------|-----------|----------|------|
-| **Oregon** | us-west-2 | 有 | 約 130–160 ms | **本專案用這個**：與其他專案同區；AWS 首發區域，服務最齊、價格最低 |
-| 東京 | ap-northeast-1 | 有 | 約 35–50 ms | 延遲最好的替代；Lightsail 同價，其他服務貴約 20% |
+| Oregon | us-west-2 | 有 | 約 130–160 ms | 起步時用的：與其他專案同區；AWS 首發區域，服務最齊、價格最低 |
+| **東京** | ap-northeast-1 | 有 | 約 35–50 ms | **2026-11-07 起本專案用這個**；Lightsail 同價，其他服務貴約 20% |
 | 台北 | ap-east-2 | **無** | 約 5–10 ms | 只有 EC2 等正規服務；走方案 A' 才用得到 |
 
 延遲的實際影響：Hook 在背景執行感覺不到；手動 `/english-check` 與網頁操作每次請求多約 100 ms，可接受。
 SSH 打字會有一點延遲，屬正常。
 
-Console 右上角的區域選單切到 **US West (Oregon)**，之後每個服務（Lightsail、S3、IAM 以外）都要確認右上角是這一區。
+Console 右上角的區域選單切到 **Asia Pacific (Tokyo)**，之後每個服務（Lightsail、S3、IAM 以外）都要確認右上角是這一區。
 **區域一旦建了資源就不好搬**（要用快照複製），請在這一步決定。
 
 ### 1-5. 費用警報（一定要做）
@@ -80,7 +82,7 @@ aws --version
 
 - [ ] root 與 IAM 使用者皆啟用 MFA
 - [ ] 日常以 IAM 使用者登入 Console
-- [ ] Console 區域已切到 US West (Oregon)
+- [ ] Console 區域已切到 Asia Pacific (Tokyo)
 - [ ] Budgets 兩條警報建立完成，收到建立確認信
 - [ ] Bills 頁面確認沒有舊資源在扣錢
 

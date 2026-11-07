@@ -2,7 +2,10 @@
 
 ## 目標
 
-在 Oregon 建一台 Lightsail $12 實例（Ubuntu 24.04），掛靜態 IP，防火牆只開 22/80/443，用 SSH 金鑰登入並裝好 Docker。
+建一台 Lightsail 實例（Ubuntu 24.04），掛靜態 IP，防火牆只開 22/80/443，用 SSH 金鑰登入並裝好 Docker。
+
+> 本文以起步時的 Oregon $12 寫成。2026-11-07 已用快照搬到 **Tokyo $24**（靜態 IP `35.79.82.165`），見 [oregon-to-tokyo.md](oregon-to-tokyo.md)；
+> 重做時區域選 Tokyo、方案選 $24，其餘步驟相同。
 
 ## 前置條件
 
@@ -29,20 +32,20 @@ Lightsail → Instances → Create instance：
 
 | 項目 | 選擇 | 說明 |
 |------|------|------|
-| Region / Zone | **Oregon (us-west-2)**, Zone A | 01 決定的區域 |
+| Region / Zone | **Tokyo (ap-northeast-1)**, Zone A（起步時為 Oregon） | 01 決定的區域 |
 | Platform | Linux/Unix | |
 | Blueprint | **OS Only → Ubuntu 24.04 LTS** | 不要選 Apps（例如 Docker 範本不存在，WordPress 等用不到） |
 | Launch script | 留空 | Docker 在 2-6 手動裝，比較好除錯 |
 | SSH key pair | `english-tutor`（2-1 上傳的） | |
 | Network type | Dual-stack（IPv4 + IPv6） | 含公開 IPv4，不另外收費 |
-| Plan | **$12 USD**（2 GB RAM、2 vCPU、60 GB SSD、3 TB 流量） | $7（1 GB）跑五個容器加 build 會很吃緊 |
+| Plan | **$24 USD**（4 GB RAM、2 vCPU、80 GB SSD、4 TB 流量） | 起步用 $12（2 GB）跑五個容器可以，但 build 與桌面會吃 swap；$7（1 GB）不夠 |
 | Name | `Ubuntu-english-tutor` | |
 
 建立後等狀態變成 Running（約 1–2 分鐘）。
 
 ### 2-3. 靜態 IP
 
-Networking → Create static IP → 選 Oregon → 附加到 `Ubuntu-english-tutor`，名稱 `english-tutor-ip`。
+Networking → Create static IP → 選與實例相同的區域 → 附加到實例，名稱 `english-tutor-ip`（Tokyo 版現為 `35.79.82.165`）。
 
 - 附加在實例上的靜態 IP **免費**；沒附加的會收 $0.005/小時（約 $3.65/月），實例刪掉時記得一起刪 IP。
 - 記下這個 IP，之後 DNS 會指到這裡。
@@ -127,7 +130,7 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 ## 完成條件
 
-- [x] Lightsail 顯示實例 Running，區域 Oregon，方案 $12
+- [x] Lightsail 顯示實例 Running，區域 Oregon，方案 $12（2026-11-07 起：Tokyo，$24）
 - [x] 靜態 IP 已附加，`curl checkip` 結果一致
 - [x] 防火牆只有 22/80/443
 - [x] `ssh english-tutor` 以金鑰登入成功
@@ -141,7 +144,7 @@ grep -E '^PasswordAuthentication' /etc/ssh/sshd_config /etc/ssh/sshd_config.d/* 
 
 **2026-11-01**
 
-- 實例 `Ubuntu-english-tutor`，Oregon Zone A，Ubuntu 24.04.4 LTS，靜態 IP `44.228.11.180`。
+- 實例 `Ubuntu-english-tutor`，Oregon Zone A，Ubuntu 24.04.4 LTS，靜態 IP `44.228.11.180`（已於 2026-11-07 搬到 Tokyo，新 IP `35.79.82.165`）。
 - 建立時 SSH key pair 誤選 Lightsail 預設金鑰，用自己上傳的 `id_ed25519` 登入被拒。
   解法：下載 `LightsailDefaultKey-us-west-2.pem` 到 `~/.ssh/`，`chmod 400`，`~/.ssh/config` 加 `Host english-tutor` 並設 `IdentitiesOnly yes`
   （本機 `Host *` 原本指定了另一把金鑰，不加 `IdentitiesOnly` 會一直送錯）。機器上的 `authorized_keys` 未動。

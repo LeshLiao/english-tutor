@@ -56,7 +56,7 @@ ss -tlnp | grep -E ':(5432|8000|8001|3000|8080)\b' || echo "OK: nothing exposed"
 
 本機瀏覽器開 `http://<STATIC_IP>/` 應看到前端（API 還不通，05 設好網域後才會）。
 
-### 4-4. 限制 Docker log 大小（60 GB 磁碟，先做比較安心）
+### 4-4. 限制 Docker log 大小（60 GB 磁碟時先做比較安心，80 GB 也建議）
 
 ```bash
 cat > /etc/docker/daemon.json <<'JSON'
@@ -70,7 +70,7 @@ docker compose -f docker-compose.prod.yml up -d
 
 - [x] `docker compose -f docker-compose.prod.yml ps` 五個服務 Up，db healthy（db、backend、mcp 皆 healthy）
 - [x] `ss -tlnp` 只看到 22、80、443
-- [x] `http://<STATIC_IP>/api/docs` 可開（http://44.228.11.180/api/docs）
+- [x] `http://<STATIC_IP>/api/docs` 可開（原 http://44.228.11.180/api/docs，現為 http://35.79.82.165/api/docs）
 - [x] `/mcp` 沒帶 key 回 401
 - [x] `docker-compose.prod.yml` 與 `deploy/Caddyfile` 已 commit（f7edba0）
 

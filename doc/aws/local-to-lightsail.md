@@ -7,6 +7,7 @@
 
 ```
 Mac（本機開發）                          GitHub                    Lightsail 44.228.11.180（Ubuntu 24.04, 2 vCPU / 2 GB）
+                                                                    ↑ 2026-11-07 已搬到 Tokyo 35.79.82.165（4 GB），見 oregon-to-tokyo.md
 ────────────────                        ──────                    ─────────────────────────────────────────────────
 docker-compose.yml（開發用）                                       /srv/english-tutor（git clone）
 docker-compose.prod.yml  ──commit──▶  LeshLiao/        ──clone──▶   .env（伺服器上用 openssl 隨機產生，不在 git 裡）
