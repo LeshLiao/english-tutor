@@ -157,6 +157,25 @@ curl -s -o /dev/null -w "%{http_code}\n" http://localhost/         # 200
   或 `sudo systemctl stop xrdp` 先停掉，要用再開。
 - **要瀏覽器**：`sudo apt install -y firefox`（snap 版），但 2 GB 機器上 Firefox 會很吃力，
   Chromium 也一樣；建議只拿桌面做輕量設定，不要在上面上網。
+- **中文全部變成方框（框內有十六進位碼）**：最小安裝沒有中日韓字型，Chrome/XFCE 找不到字型就畫「tofu」。
+  裝 Noto CJK 後把 Chrome 完全關掉再開（或登出 RDP 再登入）即可，不用重開機（2026-11-08 已在 Tokyo 機器上裝好）：
+
+  ```bash
+  sudo apt install -y fonts-noto-cjk fonts-noto-cjk-extra && fc-cache -f
+  fc-list :lang=zh-tw family | head   # 看得到 Noto Sans CJK TC 就對了
+  ```
+
+  **snap 版 Firefox 裝完字型後仍是方框**：snap 沙箱裡的 `/usr/share/fonts` 來自 core22 基底，
+  snapd 在這台 24.04 主機上沒有把主機字型目錄掛進去（`snap run --shell firefox -c 'fc-list :lang=zh-tw'` 會是 0），
+  所以主機裝再多字型 Firefox 都看不到。解法是把字型放到 snap 看得到的使用者目錄，再重開 Firefox（2026-11-08 已做）：
+
+  ```bash
+  mkdir -p ~/snap/firefox/common/.fonts
+  cp /usr/share/fonts/opentype/noto/NotoSansCJK-{Regular,Bold}.ttc ~/snap/firefox/common/.fonts/
+  snap run --shell firefox -c 'rm -rf ~/.cache/fontconfig; fc-match sans-serif:lang=zh-tw'   # 應回 NotoSansCJK-Regular.ttc
+  ```
+
+  要在桌面打中文另外要輸入法（`fcitx5 fcitx5-chinese-addons`），字型不含輸入法。
 
 ## 移除
 
