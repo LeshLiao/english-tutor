@@ -69,7 +69,7 @@ Lightsail 警報 ──▶ Email
 | 10 | [10-stage-b-fargate.md](10-stage-b-fargate.md) | 之後升級到 ECS Fargate + RDS + ALB 的規劃 | 未來 |
 | 紀錄 | [local-to-lightsail.md](local-to-lightsail.md) | 2026-11-02 從本機到 Lightsail 的實際部署過程（03 後半 + 04） | 參考 |
 | 紀錄 | [oregon-to-tokyo.md](oregon-to-tokyo.md) | 2026-11-07 用快照從 Oregon $12 升級並搬到 Tokyo $24，靜態 IP 換成 35.79.82.165 | 參考 |
-| 選用 | [xfce-desktop.md](xfce-desktop.md) | 在同一台 Lightsail 裝 XFCE 桌面，走 SSH tunnel 用 xrdp 遠端連線 | 參考 |
+| 選用 | [xfce-desktop.md](xfce-desktop.md) | 在同一台 Lightsail 裝遠端桌面；原本是 XFCE + xrdp 走 SSH tunnel，2026-11-08 起改為 GNOME + Chrome Remote Desktop（見文件開頭更新） | 參考 |
 
 ## 前置條件
 

@@ -1,5 +1,31 @@
 # 在 Lightsail Ubuntu 上安裝 XFCE 桌面（xrdp 遠端桌面）
 
+> **2026-11-08 更新：已改用 Chrome Remote Desktop，不再走 Windows App + xrdp。**
+>
+> 下面的 XFCE / xrdp 步驟保留作參考，目前機器上的實際狀態是：
+>
+> | 項目 | 現況 |
+> |------|------|
+> | 遠端連線 | Chrome Remote Desktop（`chrome-remote-desktop` 套件，host 157.x），從 Mac 的 Chrome 開 <https://remotedesktop.google.com/access> 連線 |
+> | 桌面環境 | GNOME（`ubuntu-desktop-minimal`），`~/.chrome-remote-desktop-session` 啟動 `gnome-session --session=ubuntu` |
+> | 登入帳號 | `ubuntu`（在 `chrome-remote-desktop` 群組），原本的 `desktop` 使用者已刪除 |
+> | xrdp | 仍裝著但 `systemctl is-enabled xrdp` = disabled，3389 沒有在監聽 |
+> | 防火牆 | 不變，仍只開 22/80/443；CRD 由機器主動向 Google 連出，不需要開 port，也不用再開 SSH tunnel |
+> | 記憶體 | GNOME 比 XFCE 重，桌面常駐時 `free -h` 約用 2.4 GB，剩約 1.3 GB 可用；build 前建議先登出桌面 |
+>
+> 換掉的原因：Windows App 每次都要先開 SSH tunnel 再連 RDP，CRD 在瀏覽器直接連，手機也能用。
+>
+> 常用指令：
+>
+> ```bash
+> systemctl status chrome-remote-desktop@ubuntu --no-pager   # host 是否在跑
+> sudo systemctl restart chrome-remote-desktop@ubuntu        # 連不上時重啟
+> journalctl -u chrome-remote-desktop@ubuntu -n 50 --no-pager
+> ```
+>
+> 要重新註冊 host（例如換 Google 帳號）：到 <https://remotedesktop.google.com/headless> 走「Set up another computer」，
+> 複製 Debian Linux 那段指令在機器上執行，設定 PIN。
+
 ## 目標
 
 在現有的 Tokyo Lightsail 實例（Ubuntu 24.04，2 vCPU / 4 GB，$24 方案）裝一個輕量的 XFCE 桌面，
