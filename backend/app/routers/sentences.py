@@ -106,3 +106,15 @@ def update_sentence(
     db.commit()
     db.refresh(sentence)
     return sentence
+
+
+@router.delete("/{sentence_id}", status_code=status.HTTP_204_NO_CONTENT)
+def delete_sentence(
+    sentence_id: int,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> None:
+    """永久刪除一筆句子及其錯誤紀錄（無法復原；只想排除統計請用 PATCH is_dismissed）。"""
+    sentence = _get_own_sentence(db, user, sentence_id)
+    db.delete(sentence)
+    db.commit()

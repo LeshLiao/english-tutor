@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { api, formatDateTime } from '../api'
 import { ErrorBox, Loading, SourceBadge } from '../components'
 import { wordDiff } from '../diff'
@@ -7,6 +7,7 @@ import { wordDiff } from '../diff'
 export default function SentenceDetail() {
   const id = Number(useParams().id)
   const qc = useQueryClient()
+  const navigate = useNavigate()
   const sentence = useQuery({ queryKey: ['sentence', id], queryFn: () => api.sentence(id), enabled: Number.isFinite(id) })
   const dismiss = useMutation({
     mutationFn: (value: boolean) => api.setDismissed(id, value),
@@ -15,6 +16,15 @@ export default function SentenceDetail() {
       // 列表與統計都會受 is_dismissed 影響
       void qc.invalidateQueries({ queryKey: ['sentences'] })
       void qc.invalidateQueries({ queryKey: ['stats'] })
+    },
+  })
+  const remove = useMutation({
+    mutationFn: () => api.deleteSentence(id),
+    onSuccess: () => {
+      qc.removeQueries({ queryKey: ['sentence', id] })
+      void qc.invalidateQueries({ queryKey: ['sentences'] })
+      void qc.invalidateQueries({ queryKey: ['stats'] })
+      navigate('/sentences', { replace: true })
     },
   })
 
@@ -113,6 +123,22 @@ export default function SentenceDetail() {
           {dismiss.isPending ? '儲存中…' : s.is_dismissed ? '取消誤判標記' : '標記為誤判'}
         </button>
         {dismiss.error && <ErrorBox error={dismiss.error} />}
+      </section>
+
+      <section className="card">
+        <h2>刪除</h2>
+        <p className="muted">永久刪除這句與它的錯誤紀錄，無法復原。只是想排除統計的話請改用上面的誤判標記。</p>
+        <button
+          type="button"
+          className="btn btn-danger"
+          disabled={remove.isPending}
+          onClick={() => {
+            if (window.confirm(`確定要永久刪除句子 #${s.id}？`)) remove.mutate()
+          }}
+        >
+          {remove.isPending ? '刪除中…' : '刪除這句'}
+        </button>
+        {remove.error && <ErrorBox error={remove.error} />}
       </section>
     </>
   )

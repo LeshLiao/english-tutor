@@ -81,6 +81,7 @@ async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
     }
     throw new ApiError(res.status, `${res.status} ${detail}`)
   }
+  if (res.status === 204) return undefined as T
   return res.json() as Promise<T>
 }
 
@@ -90,6 +91,7 @@ export const api = {
   sentence: (id: number) => request<Sentence>(`/sentences/${id}`),
   setDismissed: (id: number, is_dismissed: boolean) =>
     request<Sentence>(`/sentences/${id}`, { method: 'PATCH', body: JSON.stringify({ is_dismissed }) }),
+  deleteSentence: (id: number) => request<void>(`/sentences/${id}`, { method: 'DELETE' }),
   errorStats: (query: { from?: string; to?: string } = {}) =>
     request<ErrorStat[]>(`/stats/errors${toQuery(query)}`),
   trend: (query: { interval?: 'day' | 'week'; from?: string; to?: string } = {}) =>

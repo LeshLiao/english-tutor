@@ -120,6 +120,23 @@ def test_dismiss_excludes_from_list_and_stats(client, auth, sample, type_name):
     assert client.patch(f"/sentences/{created['id']}", json={}, headers=auth).status_code == 422
 
 
+def test_delete_removes_sentence_errors_and_stats(client, auth, sample, type_name):
+    created = client.post("/sentences", json=sample, headers=auth).json()
+    assert client.get(f"/sentences/{created['id']}", headers=auth).status_code == 200
+
+    r = client.delete(f"/sentences/{created['id']}", headers=auth)
+    assert r.status_code == 204
+    assert r.content == b""
+
+    assert client.get(f"/sentences/{created['id']}", headers=auth).status_code == 404
+    assert client.get("/sentences", params={"include_dismissed": True}, headers=auth).json() == []
+    assert client.get("/stats/errors", headers=auth).json() == []
+
+    # 再刪一次或刪不存在的 → 404；沒帶 key → 401
+    assert client.delete(f"/sentences/{created['id']}", headers=auth).status_code == 404
+    assert client.delete(f"/sentences/{created['id']}").status_code == 401
+
+
 def test_trend_groups_by_day_and_week(client, auth, sample):
     client.post("/sentences", json=sample, headers=auth)  # 1 error
     client.post("/sentences", json={**sample, "original_text": "It is correct.", "corrected_text": "It is correct.", "errors": []}, headers=auth)  # 0 errors
