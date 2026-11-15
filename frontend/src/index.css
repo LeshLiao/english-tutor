@@ -262,6 +262,21 @@ code {
   background: var(--danger);
   border-color: var(--danger);
 }
+.btn-sm {
+  padding: 3px 10px;
+  font-size: 0.85rem;
+}
+.btn-delete {
+  color: var(--danger);
+  border-color: transparent;
+}
+.btn-delete:hover {
+  border-color: var(--danger);
+}
+.col-actions {
+  text-align: right;
+  white-space: nowrap;
+}
 .pager {
   display: flex;
   gap: 12px;
@@ -299,4 +314,89 @@ code {
   color: var(--diff-removed-fg);
   padding: 10px 12px;
   border-radius: 8px;
+}
+
+/* ---- 手機版：列表每一列改成卡片 ----
+ * 第一行：時間 | 來源 | 刪除鈕（靠右）
+ * 第二行：錯誤類型
+ * 第三行：原句
+ */
+@media (max-width: 640px) {
+  .page {
+    padding: 16px 16px 40px;
+  }
+  .topbar {
+    gap: 12px;
+  }
+  .filters {
+    gap: 10px;
+  }
+  .filters label:not(.checkbox) {
+    flex: 1 1 100%;
+  }
+  .filters select,
+  .filters input:not([type='checkbox']) {
+    width: 100%;
+  }
+  .filters .btn {
+    flex: 1 1 auto;
+  }
+
+  .sentence-table,
+  .sentence-table tbody {
+    display: block;
+  }
+  .sentence-table thead,
+  .sentence-table .col-id {
+    display: none;
+  }
+  .sentence-table tr {
+    display: grid;
+    grid-template-columns: auto auto 1fr;
+    grid-template-areas:
+      'time source actions'
+      'types types types'
+      'text text text';
+    align-items: center;
+    column-gap: 10px;
+    row-gap: 6px;
+    padding: 10px 12px;
+    margin-bottom: 10px;
+    background: var(--surface-1);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .sentence-table td {
+    display: block;
+    padding: 0;
+    border-bottom: 0;
+  }
+  .sentence-table .col-time {
+    grid-area: time;
+    font-size: 0.85rem;
+  }
+  .sentence-table .col-source {
+    grid-area: source;
+  }
+  .sentence-table .col-actions {
+    grid-area: actions;
+    justify-self: end;
+  }
+  .sentence-table .col-types {
+    grid-area: types;
+  }
+  .sentence-table .col-text {
+    grid-area: text;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+  .sentence-table .col-text a {
+    color: var(--text-primary);
+  }
+  .sentence-table tr.dismissed td {
+    opacity: 1;
+  }
+  .sentence-table tr.dismissed {
+    opacity: 0.6;
+  }
 }

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
-import { Link, useSearchParams } from 'react-router-dom'
-import { api, formatDateTime } from '../api'
-import { Empty, ErrorBox, ErrorTypeChips, Loading, SourceBadge } from '../components'
+import { useSearchParams } from 'react-router-dom'
+import { api } from '../api'
+import { Empty, ErrorBox, Loading, SentenceTable } from '../components'
 
 const PAGE_SIZE = 20
 
@@ -93,37 +93,7 @@ export default function SentenceList() {
       {list.isPending && <Loading />}
       {list.error && <ErrorBox error={list.error} />}
       {list.data && list.data.length === 0 && <Empty>{page > 1 ? '這一頁沒有資料' : '沒有符合的句子'}</Empty>}
-      {list.data && list.data.length > 0 && (
-        <table className="table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>時間</th>
-              <th>原句</th>
-              <th>錯誤類型</th>
-              <th>來源</th>
-            </tr>
-          </thead>
-          <tbody>
-            {list.data.map((s) => (
-              <tr key={s.id} className={s.is_dismissed ? 'dismissed' : undefined}>
-                <td className="muted">{s.id}</td>
-                <td className="nowrap muted">{formatDateTime(s.created_at)}</td>
-                <td>
-                  <Link to={`/sentences/${s.id}`}>{s.original_text}</Link>
-                  {s.is_dismissed && <span className="chip chip-muted">誤判</span>}
-                </td>
-                <td>
-                  <ErrorTypeChips sentence={s} />
-                </td>
-                <td>
-                  <SourceBadge source={s.source} />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+      {list.data && list.data.length > 0 && <SentenceTable sentences={list.data} showId />}
 
       <div className="pager">
         <button type="button" className="btn btn-ghost" disabled={page <= 1} onClick={() => update({ page: String(page - 1) })}>

@@ -12,10 +12,11 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
-import { api, formatDateTime, type TrendPoint } from '../api'
-import { Empty, ErrorBox, ErrorTypeChips, Loading, SourceBadge } from '../components'
+import { api, type TrendPoint } from '../api'
+import { Empty, ErrorBox, Loading, SentenceTable } from '../components'
 
 const TREND_DAYS = 30
+const RECENT_COUNT = 100
 
 function isoDaysAgo(days: number): string {
   const d = new Date()
@@ -49,7 +50,7 @@ export default function Overview() {
     queryKey: ['stats', 'trend', TREND_DAYS],
     queryFn: () => api.trend({ interval: 'day', from: isoDaysAgo(TREND_DAYS) }),
   })
-  const recent = useQuery({ queryKey: ['sentences', 'recent'], queryFn: () => api.sentences({ limit: 5 }) })
+  const recent = useQuery({ queryKey: ['sentences', 'recent'], queryFn: () => api.sentences({ limit: RECENT_COUNT }) })
 
   const totalErrors = stats.data?.reduce((s, r) => s + r.count, 0) ?? 0
   const trendData = trend.data ? fillDays(trend.data, TREND_DAYS) : []
@@ -127,40 +128,13 @@ export default function Overview() {
 
       <section className="card">
         <div className="card-head">
-          <h2>最近 5 筆句子</h2>
+          <h2>最近 {RECENT_COUNT} 筆句子</h2>
           <Link to="/sentences">看全部 →</Link>
         </div>
         {recent.isPending && <Loading />}
         {recent.error && <ErrorBox error={recent.error} />}
         {recent.data && recent.data.length === 0 && <Empty>還沒有任何句子</Empty>}
-        {recent.data && recent.data.length > 0 && (
-          <table className="table">
-            <thead>
-              <tr>
-                <th>時間</th>
-                <th>原句</th>
-                <th>錯誤類型</th>
-                <th>來源</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recent.data.map((s) => (
-                <tr key={s.id}>
-                  <td className="nowrap muted">{formatDateTime(s.created_at)}</td>
-                  <td>
-                    <Link to={`/sentences/${s.id}`}>{s.original_text}</Link>
-                  </td>
-                  <td>
-                    <ErrorTypeChips sentence={s} />
-                  </td>
-                  <td>
-                    <SourceBadge source={s.source} />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
+        {recent.data && recent.data.length > 0 && <SentenceTable sentences={recent.data} />}
       </section>
     </>
   )

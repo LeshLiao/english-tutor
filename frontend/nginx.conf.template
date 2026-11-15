@@ -5,8 +5,15 @@ server {
     index index.html;
 
     # React Router：找不到實體檔案就回 index.html
+    # index.html 不快取，瀏覽器每次都重新驗證，部署後才不會卡在舊版 bundle
     location / {
+        add_header Cache-Control "no-cache";
         try_files $uri $uri/ /index.html;
+    }
+
+    # vite 產出的檔名帶 hash，內容改變檔名就變，可以長期快取
+    location /assets/ {
+        add_header Cache-Control "public, max-age=31536000, immutable";
     }
 
     # /api/xxx → backend:8000/xxx，並由這裡注入 API key（bundle 裡沒有 key）
