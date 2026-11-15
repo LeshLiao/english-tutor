@@ -144,7 +144,7 @@ ssh -N -L 3389:localhost:3389 ubuntu@35.79.82.165
 
 ```bash
 free -h                      # 看桌面登入後還剩多少記憶體
-docker compose -f /srv/english-tutor/docker-compose.prod.yml ps   # 五個容器仍 Up / healthy
+docker compose -f /home/ubuntu/sourceCode/english-tutor/docker-compose.prod.yml ps   # 五個容器仍 Up / healthy
 curl -s -o /dev/null -w "%{http_code}\n" http://localhost/         # 200
 ```
 

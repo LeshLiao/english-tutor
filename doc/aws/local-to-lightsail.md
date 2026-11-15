@@ -9,7 +9,7 @@
 Mac（本機開發）                          GitHub                    Lightsail 44.228.11.180（Ubuntu 24.04, 2 vCPU / 2 GB）
                                                                     ↑ 2026-11-07 已搬到 Tokyo 35.79.82.165（4 GB），見 oregon-to-tokyo.md
 ────────────────                        ──────                    ─────────────────────────────────────────────────
-docker-compose.yml（開發用）                                       /srv/english-tutor（git clone）
+docker-compose.yml（開發用）                                       /home/ubuntu/sourceCode/english-tutor（git clone）
 docker-compose.prod.yml  ──commit──▶  LeshLiao/        ──clone──▶   .env（伺服器上用 openssl 隨機產生，不在 git 裡）
 deploy/Caddyfile            push       english-tutor                 docker compose -f docker-compose.prod.yml up -d
                                                                        ├── caddy     :80/:443 ← 唯一對外的容器
@@ -81,8 +81,8 @@ id; docker --version; docker compose version; ls -la /srv; free -h; df -h /; swa
 ### 2-2. 建目錄並 clone
 
 ```bash
-sudo mkdir -p /srv/english-tutor && sudo chown ubuntu:ubuntu /srv/english-tutor
-cd /srv/english-tutor && git clone https://github.com/LeshLiao/english-tutor.git .
+mkdir -p /home/ubuntu/sourceCode/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor && git clone https://github.com/LeshLiao/english-tutor.git .
 ```
 
 選擇讓目錄歸 ubuntu 而不是 root：之後 `git pull` 不用 sudo，docker 也不用 sudo，整個更新流程可以用一般帳號完成。
@@ -98,7 +98,7 @@ chmod 600 .env
 - 密碼與 API key 在伺服器上隨機產生，整個過程**沒有把值印在畫面上**，只印了變數名稱與 key 長度（64）。
 - `CORS_ORIGINS` 留空：前端與 API 同源（都走 Caddy → nginx），不需要 CORS。
 - `DOMAIN` 留空：05 設網域時再填。
-- 之後 Claude Code 要連雲端 MCP（06）時，用 `ssh english-tutor 'grep ^API_KEY= /srv/english-tutor/.env'` 取 key。
+- 之後 Claude Code 要連雲端 MCP（06）時，用 `ssh english-tutor 'grep ^API_KEY= /home/ubuntu/sourceCode/english-tutor/.env'` 取 key。
 
 ### 2-4. Build 與啟動
 
@@ -165,7 +165,7 @@ docker compose exec -T db pg_dump -U english -d english_practice --data-only \
 scp english-tutor-data.sql english-tutor:/tmp/
 
 # Lightsail：單一交易匯入，任何錯誤整個回滾
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 docker compose -f docker-compose.prod.yml exec -T db psql -U english -d english_practice \
   -v ON_ERROR_STOP=1 --single-transaction < /tmp/english-tutor-data.sql
 rm /tmp/english-tutor-data.sql
@@ -181,7 +181,7 @@ rm /tmp/english-tutor-data.sql
 # Mac
 git push origin main
 # Lightsail（cmux 面板或 ssh english-tutor）
-cd /srv/english-tutor && git pull && docker compose -f docker-compose.prod.yml up -d --build
+cd /home/ubuntu/sourceCode/english-tutor && git pull && docker compose -f docker-compose.prod.yml up -d --build
 ```
 
 只重 build 有變動的映像，migration 由 backend 啟動時自動套用。詳見 [08-update-cicd.md](08-update-cicd.md)。

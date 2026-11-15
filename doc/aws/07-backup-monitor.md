@@ -67,7 +67,7 @@ aws s3 ls s3://english-tutor-backup-<隨機字串>/   # 空的，但不能是 Ac
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 mkdir -p /srv/backups
 STAMP=$(date +%Y%m%d-%H%M)
 FILE="/srv/backups/english_${STAMP}.dump"
@@ -93,7 +93,7 @@ crontab -e
 ```
 
 ```
-30 3 * * * cd /srv/english-tutor && set -a && . ./.env && set +a && ./deploy/backup.sh >> /var/log/english-backup.log 2>&1
+30 3 * * * cd /home/ubuntu/sourceCode/english-tutor && set -a && . ./.env && set +a && ./deploy/backup.sh >> /var/log/english-backup.log 2>&1
 ```
 
 ### 7-5. 還原測試（一定要做一次）

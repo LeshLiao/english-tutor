@@ -17,7 +17,7 @@
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 git pull --ff-only
 docker compose -f docker-compose.prod.yml build
 docker compose -f docker-compose.prod.yml up -d
@@ -28,7 +28,7 @@ docker compose -f docker-compose.prod.yml ps
 
 ```bash
 chmod +x deploy/update.sh
-sudo /srv/english-tutor/deploy/update.sh
+sudo /home/ubuntu/sourceCode/english-tutor/deploy/update.sh
 ```
 
 > 有資料表變更的版本，更新前先 `./deploy/backup.sh`，並在 Lightsail 手動拍一張快照。
@@ -36,7 +36,7 @@ sudo /srv/english-tutor/deploy/update.sh
 ### 8-2. 從本機一鍵觸發
 
 ```bash
-ssh english-tutor sudo /srv/english-tutor/deploy/update.sh
+ssh english-tutor sudo /home/ubuntu/sourceCode/english-tutor/deploy/update.sh
 ```
 
 ### 8-3. GitHub Actions 自動部署（選用）
@@ -64,7 +64,7 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ubuntu
           key: ${{ secrets.VPS_SSH_KEY }}
-          script: sudo /srv/english-tutor/deploy/update.sh
+          script: sudo /home/ubuntu/sourceCode/english-tutor/deploy/update.sh
 ```
 
 若 02-4 的 SSH 防火牆有限制來源 IP，GitHub Actions 的 runner IP 會被擋；
@@ -84,7 +84,7 @@ jobs:
 ### 8-5. 回滾
 
 ```bash
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 git log --oneline -5
 git checkout <上一版 commit>
 docker compose -f docker-compose.prod.yml up -d --build

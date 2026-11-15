@@ -53,7 +53,7 @@ free -h
 ### 3-4. 建立部署用的目錄與 repo
 
 ```bash
-mkdir -p /srv && cd /srv
+mkdir -p /home/ubuntu/sourceCode && cd /home/ubuntu/sourceCode
 git clone https://github.com/<你的帳號>/english-tutor.git
 cd english-tutor
 ```
@@ -88,7 +88,7 @@ chmod 600 .env
 
 - [x] `apt upgrade` 完成，`unattended-upgrades` 啟用
 - [x] `free -h` 看到 2 GB swap
-- [x] `/srv/english-tutor/.env` 存在、權限 600、密碼與 API key 皆為新產生（2026-11-02）
+- [x] `/home/ubuntu/sourceCode/english-tutor/.env` 存在、權限 600、密碼與 API key 皆為新產生（2026-11-02）
 - [x] 時區為 Asia/Taipei
 
 ## 下一步
@@ -107,7 +107,7 @@ chmod 600 .env
 
 **2026-11-02**（後半段：3-4 到 3-5，透過 cmux 裡已登入的 SSH 面板操作）
 
-- `/srv/english-tutor` 改為 `chown ubuntu:ubuntu`，用一般帳號 clone 與之後 `git pull`、`docker compose`（ubuntu 已在 docker 群組）。
+- `/home/ubuntu/sourceCode/english-tutor` 改為 `chown ubuntu:ubuntu`，用一般帳號 clone 與之後 `git pull`、`docker compose`（ubuntu 已在 docker 群組）。
 - repo 公開，`git clone https://github.com/LeshLiao/english-tutor.git .`（f7edba0）。
 - `.env` 由 `openssl rand` 在伺服器上產生，`chmod 600`；多了 `CORS_ORIGINS=`（同源不需要）與 `DOMAIN=`（05 再填）兩個空值。
 - 完整過程見 [local-to-lightsail.md](local-to-lightsail.md)。

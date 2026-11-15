@@ -74,7 +74,7 @@ claude mcp add --transport http english-practice http://localhost:8001/mcp --hea
 使用者決定不等網域，先讓 Claude Code 連雲端 MCP。
 
 ```bash
-KEY=$(ssh english-tutor "grep '^API_KEY=' /srv/english-tutor/.env | cut -d= -f2")   # 不要 echo
+KEY=$(ssh english-tutor "grep '^API_KEY=' /home/ubuntu/sourceCode/english-tutor/.env | cut -d= -f2")   # 不要 echo
 claude mcp remove english-practice
 claude mcp add --transport http english-practice http://35.79.82.165/mcp --header "X-API-Key: $KEY"
 claude mcp list        # english-practice: http://35.79.82.165/mcp (HTTP) - ✔ Connected

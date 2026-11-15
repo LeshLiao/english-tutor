@@ -26,7 +26,7 @@
 
 ```bash
 sudo -i
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 git pull
 docker compose -f docker-compose.prod.yml build      # 第一次約 3–5 分鐘，2 vCPU 比 Hostinger KVM 1 快
 docker compose -f docker-compose.prod.yml up -d

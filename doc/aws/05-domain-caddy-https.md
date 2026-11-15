@@ -62,7 +62,7 @@ docker run --rm caddy:2 caddy hash-password --plaintext '<你的密碼>'
 ### 5-3. 套用
 
 ```bash
-cd /srv/english-tutor
+cd /home/ubuntu/sourceCode/english-tutor
 git pull
 docker compose -f docker-compose.prod.yml up -d --force-recreate caddy
 docker compose -f docker-compose.prod.yml logs -f caddy   # 看到 certificate obtained 即成功

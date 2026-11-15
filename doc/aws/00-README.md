@@ -9,6 +9,7 @@ Claude Code 透過公開網址連線 MCP Server。程式碼與本機版完全相
 > 價格皆為 2026-11-01 上網查到的美金價（Oregon 區域，us-west-2），細節與來源見 [09-cost.md](09-cost.md)。
 > **目前狀態（2026-11-07）**：已從 Oregon $12 搬到 **Tokyo（ap-northeast-1）$24**（2 vCPU / 4 GB / 80 GB），靜態 IP `35.79.82.165`，過程見 [oregon-to-tokyo.md](oregon-to-tokyo.md)。Lightsail 各區域同價。
 > 開始前請再到 AWS 價格頁或 Pricing Calculator 確認一次。
+> **路徑變更（2026-11-15）**：伺服器上的 repo 已從 `/srv/english-tutor` 搬到 `/home/ubuntu/sourceCode/english-tutor`，以下各篇的指令皆已改用新路徑；[hostinger/](../hostinger/00-README.md) 仍是 root 登入的 `/srv` 版本，不受影響。
 
 ## 三種方案比較
 
