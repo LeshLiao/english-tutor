@@ -9,26 +9,11 @@
 |------|------|
 | `Dockerfile` | 單階段：安裝依賴 → `npm run build` → `npm run preview` |
 | `.dockerignore` | 排除 `node_modules`、`dist` 等，縮小 build context |
-| `docker-compose.yml` | 一行指令建置並啟動，對外開 8082 port |
 | `src/` | React 原始碼（一個計數器按鈕） |
 
 ## 使用方式
 
-### 方法一：docker compose（推薦）
-
-```bash
-docker compose up --build
-```
-
-瀏覽器開 <http://localhost:8082>。
-
-停止並移除容器：
-
-```bash
-docker compose down
-```
-
-### 方法二：純 docker 指令
+### 純 docker 指令（同時跑前後端請用上層的 docker-compose.yml）
 
 ```bash
 docker build -t docker-react-demo .

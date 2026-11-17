@@ -1,0 +1,18 @@
+# 一個檔案同時管前端與後端。
+# 在本目錄執行：docker compose up --build -d   /   docker compose down
+services:
+  backend:
+    build: ./backend            # 用 backend/Dockerfile 建 image
+    image: docker-fastapi-demo
+    container_name: docker-fastapi-demo
+    ports:
+      - "8083:8000"             # Mac 的 8083 → 容器內 8000
+
+  frontend:
+    build: ./frontend           # 用 frontend/Dockerfile 建 image
+    image: docker-react-demo
+    container_name: docker-react-demo
+    ports:
+      - "8082:4173"             # Mac 的 8082 → 容器內 4173
+    depends_on:
+      - backend                 # 先起 backend，再起 frontend
